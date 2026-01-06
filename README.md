@@ -217,7 +217,7 @@ This method uses GitHub Actions to automatically build the Docker image, then Po
 #### Step 1: Push to GitHub
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/ha-dashboard.git
+git remote add origin https://github.com/waynehead99/homeAssistantApp.git
 git push -u origin main
 ```
 
@@ -252,14 +252,14 @@ git push -u origin main
 3. Configure:
    | Setting | Value |
    |---------|-------|
-   | Repository URL | `https://github.com/YOUR_USERNAME/ha-dashboard` |
+   | Repository URL | `https://github.com/waynehead99/homeAssistantApp` |
    | Repository reference | `refs/heads/main` |
    | **Compose path** | `docker-compose.portainer.yml` |
 
 4. Add **Environment variables**:
    | Name | Value |
    |------|-------|
-   | `GITHUB_REPO` | `your-username/ha-dashboard` (lowercase!) |
+   | `GITHUB_REPO` | `waynehead99/homeassistantapp` (lowercase!) |
    | `DASHBOARD_PORT` | `3000` (optional) |
 
 5. Click **Deploy the stack**

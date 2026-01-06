@@ -4,7 +4,7 @@ version: '3.8'
 
 services:
   ha-dashboard:
-    image: ghcr.io/${GITHUB_REPO:-your-username/ha-dashboard}:latest
+    image: ghcr.io/${GITHUB_REPO:-waynehead99/homeassistantapp}:latest
     container_name: ha-dashboard
     ports:
       - "${DASHBOARD_PORT:-3000}:80"
