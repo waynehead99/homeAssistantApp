@@ -156,55 +156,59 @@ Best for local network use without exposing HA to the internet.
    sudo systemctl reload nginx
    ```
 
-#### Using Docker
+#### Using Docker (Recommended for servers)
 
-1. Create `Dockerfile`:
-   ```dockerfile
-   FROM node:20-alpine AS builder
-   WORKDIR /app
-   COPY package*.json ./
-   RUN npm ci
-   COPY . .
-   ARG VITE_HA_URL
-   ARG VITE_HA_TOKEN
-   ARG VITE_FRIGATE_URL
-   ARG VITE_CLAUDE_API_KEY
-   RUN npm run build
+**Quick Start with Deploy Script:**
 
-   FROM nginx:alpine
-   COPY --from=builder /app/dist /usr/share/nginx/html
-   COPY nginx.conf /etc/nginx/conf.d/default.conf
-   EXPOSE 80
-   CMD ["nginx", "-g", "daemon off;"]
-   ```
-
-2. Create `nginx.conf`:
-   ```nginx
-   server {
-       listen 80;
-       root /usr/share/nginx/html;
-       index index.html;
-       
-       location / {
-           try_files $uri $uri/ /index.html;
-       }
-       
-       location /assets/ {
-           expires 1y;
-           add_header Cache-Control "public, immutable";
-       }
-   }
-   ```
-
-3. Build and run:
+1. Copy the project to your server
+2. Run the deploy script:
    ```bash
-   docker build \
-     --build-arg VITE_HA_URL=http://homeassistant:8123 \
-     --build-arg VITE_HA_TOKEN=your_token \
-     -t ha-dashboard .
-   
-   docker run -d -p 3000:80 ha-dashboard
+   ./deploy.sh
    ```
+3. The script will prompt you to edit `.env` if needed, then build and start the container
+
+**Manual Docker Compose:**
+
+1. Create your `.env` file:
+   ```bash
+   cp .env.example .env
+   nano .env  # Add your HA URL and token
+   ```
+
+2. Build and run with Docker Compose:
+   ```bash
+   docker compose up -d --build
+   ```
+
+3. Access the dashboard at `http://your-server:3000`
+
+**Docker Compose Commands:**
+```bash
+# View logs
+docker compose logs -f
+
+# Stop the container
+docker compose down
+
+# Restart
+docker compose restart
+
+# Rebuild after code changes
+docker compose up -d --build
+```
+
+**Manual Docker Build (without Compose):**
+
+```bash
+docker build \
+  --build-arg VITE_HA_URL=http://homeassistant.local:8123 \
+  --build-arg VITE_HA_TOKEN=your_long_lived_token \
+  --build-arg VITE_FRIGATE_URL=http://frigate.local:5000 \
+  --build-arg VITE_CLAUDE_API_KEY=your_claude_key \
+  -t ha-dashboard .
+
+docker run -d -p 3000:80 --name ha-dashboard --restart unless-stopped ha-dashboard
+```
 
 ### Option 4: Home Assistant Add-on / Ingress
 
