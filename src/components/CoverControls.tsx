@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { CoverEntity } from '../types/homeAssistant'
 import { CoverSupportedFeatures } from '../types/homeAssistant'
 import { callService } from '../services/homeAssistant'
@@ -52,6 +52,30 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
   const [loading, setLoading] = useState(false)
   const [localPosition, setLocalPosition] = useState(entity.attributes.current_position ?? 0)
   const [localTiltPosition, setLocalTiltPosition] = useState(entity.attributes.current_tilt_position ?? 0)
+  const pendingPositionRef = useRef<number | null>(null)
+  const pendingTiltRef = useRef<number | null>(null)
+
+  // Sync local state when entity prop changes, but not if we have pending changes
+  useEffect(() => {
+    const entityPos = entity.attributes.current_position ?? 0
+    const entityTilt = entity.attributes.current_tilt_position ?? 0
+
+    // Clear pending if HA now matches
+    if (pendingPositionRef.current !== null && Math.abs(entityPos - pendingPositionRef.current) <= 2) {
+      pendingPositionRef.current = null
+    }
+    if (pendingTiltRef.current !== null && Math.abs(entityTilt - pendingTiltRef.current) <= 2) {
+      pendingTiltRef.current = null
+    }
+
+    // Only sync from entity if we don't have pending changes
+    if (pendingPositionRef.current === null) {
+      setLocalPosition(entityPos)
+    }
+    if (pendingTiltRef.current === null) {
+      setLocalTiltPosition(entityTilt)
+    }
+  }, [entity.attributes.current_position, entity.attributes.current_tilt_position])
 
   const state = entity.state // open, closed, opening, closing, stopped
   const position = entity.attributes.current_position ?? 0
@@ -124,6 +148,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
   const handlePositionCommit = async () => {
     if (localPosition === position) return
 
+    pendingPositionRef.current = localPosition // Mark as pending until HA confirms
     setLoading(true)
     try {
       onUpdate({
@@ -137,6 +162,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
       })
     } catch (error) {
       console.error('Failed to set cover position:', error)
+      pendingPositionRef.current = null // Clear pending on error
       onUpdate(entity)
     } finally {
       setLoading(false)
@@ -150,6 +176,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
   const handleTiltCommit = async () => {
     if (localTiltPosition === tiltPosition) return
 
+    pendingTiltRef.current = localTiltPosition // Mark as pending until HA confirms
     setLoading(true)
     try {
       onUpdate({
@@ -162,6 +189,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
       })
     } catch (error) {
       console.error('Failed to set tilt position:', error)
+      pendingTiltRef.current = null // Clear pending on error
       onUpdate(entity)
     } finally {
       setLoading(false)

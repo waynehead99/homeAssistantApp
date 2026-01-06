@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { useAIInsights } from '../hooks/useAIInsights'
 import { lightService, callService } from '../services/homeAssistant'
@@ -11,22 +11,56 @@ import { LockControls } from '../components/LockControls'
 import { CoverControls } from '../components/CoverControls'
 import { AutomationToggle } from '../components/AutomationToggle'
 import { RelatedEntitiesSection } from '../components/RelatedEntitiesSection'
-import type { ClimateEntity, VacuumEntity, AlarmEntity, FanEntity, LockEntity, CoverEntity } from '../types/homeAssistant'
 
-type ModalEntity =
-  | { type: 'climate'; entity: ClimateEntity }
-  | { type: 'vacuum'; entity: VacuumEntity }
-  | { type: 'alarm'; entity: AlarmEntity }
-  | { type: 'fan'; entity: FanEntity }
-  | { type: 'lock'; entity: LockEntity }
-  | { type: 'cover'; entity: CoverEntity }
+// Store only entity_id and type, look up actual entity from context for real-time updates
+type ModalEntityRef =
+  | { type: 'climate'; entityId: string }
+  | { type: 'vacuum'; entityId: string }
+  | { type: 'alarm'; entityId: string }
+  | { type: 'fan'; entityId: string }
+  | { type: 'lock'; entityId: string }
+  | { type: 'cover'; entityId: string }
   | null
 
 export function HomeView() {
   const { lights, switches, climate, vacuums, alarms, valves, fans, locks, covers, automations, scripts, settings, updateEntity, getDisplayName } = useHomeAssistantContext()
   const { insight, loading, generateInsight, refresh: refreshInsight, isConfigured } = useAIInsights()
   const [loadingEntities, setLoadingEntities] = useState<Set<string>>(new Set())
-  const [modalEntity, setModalEntity] = useState<ModalEntity>(null)
+  const [modalEntityRef, setModalEntityRef] = useState<ModalEntityRef>(null)
+
+  // Look up the actual entity from context - this updates when context updates
+  const modalEntity = useMemo(() => {
+    if (!modalEntityRef) return null
+
+    switch (modalEntityRef.type) {
+      case 'climate': {
+        const entity = climate.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'climate' as const, entity } : null
+      }
+      case 'vacuum': {
+        const entity = vacuums.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'vacuum' as const, entity } : null
+      }
+      case 'alarm': {
+        const entity = alarms.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'alarm' as const, entity } : null
+      }
+      case 'fan': {
+        const entity = fans.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'fan' as const, entity } : null
+      }
+      case 'lock': {
+        const entity = locks.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'lock' as const, entity } : null
+      }
+      case 'cover': {
+        const entity = covers.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'cover' as const, entity } : null
+      }
+      default:
+        return null
+    }
+  }, [modalEntityRef, climate, vacuums, alarms, fans, locks, covers])
 
   // Generate insight on mount (only if enabled)
   useEffect(() => {
@@ -110,17 +144,17 @@ export function HomeView() {
   const handleEntityClick = useCallback((entity: NonNullable<typeof pinnedEntities[number]>) => {
     // Complex entities open modal for detailed controls
     if (entity.type === 'climate') {
-      setModalEntity({ type: 'climate', entity: entity as ClimateEntity })
+      setModalEntityRef({ type: 'climate', entityId: entity.entity_id })
     } else if (entity.type === 'vacuum') {
-      setModalEntity({ type: 'vacuum', entity: entity as VacuumEntity })
+      setModalEntityRef({ type: 'vacuum', entityId: entity.entity_id })
     } else if (entity.type === 'alarm') {
-      setModalEntity({ type: 'alarm', entity: entity as AlarmEntity })
+      setModalEntityRef({ type: 'alarm', entityId: entity.entity_id })
     } else if (entity.type === 'fan') {
-      setModalEntity({ type: 'fan', entity: entity as FanEntity })
+      setModalEntityRef({ type: 'fan', entityId: entity.entity_id })
     } else if (entity.type === 'lock') {
-      setModalEntity({ type: 'lock', entity: entity as LockEntity })
+      setModalEntityRef({ type: 'lock', entityId: entity.entity_id })
     } else if (entity.type === 'cover') {
-      setModalEntity({ type: 'cover', entity: entity as CoverEntity })
+      setModalEntityRef({ type: 'cover', entityId: entity.entity_id })
     } else {
       // Simple entities just toggle
       handleSimpleToggle(entity)
@@ -405,62 +439,43 @@ export function HomeView() {
       {/* Entity Control Modal */}
       <EntityControlModal
         isOpen={modalEntity !== null}
-        onClose={() => setModalEntity(null)}
+        onClose={() => setModalEntityRef(null)}
         title={getModalTitle()}
       >
         {modalEntity?.type === 'climate' && (
           <ClimateControls
             entity={modalEntity.entity}
-            onUpdate={(updated) => {
-              updateEntity(updated)
-              // Update modal state to reflect changes
-              setModalEntity({ type: 'climate', entity: updated })
-            }}
+            onUpdate={updateEntity}
           />
         )}
         {modalEntity?.type === 'vacuum' && (
           <VacuumControls
             entity={modalEntity.entity}
-            onUpdate={(updated) => {
-              updateEntity(updated)
-              setModalEntity({ type: 'vacuum', entity: updated })
-            }}
+            onUpdate={updateEntity}
           />
         )}
         {modalEntity?.type === 'alarm' && (
           <AlarmControls
             entity={modalEntity.entity}
-            onUpdate={(updated) => {
-              updateEntity(updated)
-              setModalEntity({ type: 'alarm', entity: updated })
-            }}
+            onUpdate={updateEntity}
           />
         )}
         {modalEntity?.type === 'fan' && (
           <FanControls
             entity={modalEntity.entity}
-            onUpdate={(updated) => {
-              updateEntity(updated)
-              setModalEntity({ type: 'fan', entity: updated })
-            }}
+            onUpdate={updateEntity}
           />
         )}
         {modalEntity?.type === 'lock' && (
           <LockControls
             entity={modalEntity.entity}
-            onUpdate={(updated) => {
-              updateEntity(updated)
-              setModalEntity({ type: 'lock', entity: updated })
-            }}
+            onUpdate={updateEntity}
           />
         )}
         {modalEntity?.type === 'cover' && (
           <CoverControls
             entity={modalEntity.entity}
-            onUpdate={(updated) => {
-              updateEntity(updated)
-              setModalEntity({ type: 'cover', entity: updated })
-            }}
+            onUpdate={updateEntity}
           />
         )}
         {/* Related entities from same device */}

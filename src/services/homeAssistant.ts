@@ -185,16 +185,31 @@ export const switchService = {
     callService('switch', 'toggle', { entity_id: entityId }),
 }
 
+// Callback to trigger refresh after service calls
+let onServiceCallComplete: (() => void) | null = null
+
+// Register a callback to be called after successful service calls
+export function setServiceCallCallback(callback: (() => void) | null): void {
+  onServiceCallComplete = callback
+}
+
 // Call a service
 export async function callService(
   domain: string,
   service: string,
   data: ServiceCallData
 ): Promise<HAState[]> {
-  return apiFetch<HAState[]>(`/api/services/${domain}/${service}`, {
+  const result = await apiFetch<HAState[]>(`/api/services/${domain}/${service}`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
+
+  // Trigger refresh after a short delay to allow HA to update state
+  if (onServiceCallComplete) {
+    setTimeout(onServiceCallComplete, 500)
+  }
+
+  return result
 }
 
 // Light-specific service calls

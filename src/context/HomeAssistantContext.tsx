@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from 'react'
 import type { HAState, ConnectionStatus, LightEntity, SwitchEntity, SensorEntity, BinarySensorEntity, WeatherEntity, PersonEntity, CameraEntity, CalendarEntity, ClimateEntity, VacuumEntity, AlarmEntity, ValveEntity, FanEntity, LockEntity, CoverEntity, AutomationEntity, ScriptEntity, HAArea, HAEntityRegistryEntry, HADevice } from '../types/homeAssistant'
-import { isConfigured, getStates, testConnection, getAreas, getEntityRegistry, getDeviceRegistry } from '../services/homeAssistant'
+import { isConfigured, getStates, testConnection, getAreas, getEntityRegistry, getDeviceRegistry, setServiceCallCallback } from '../services/homeAssistant'
 import { shouldShowSensor, shouldShowBinarySensor } from '../utils/sensorFilters'
 import {
   initializeSync,
@@ -1074,6 +1074,12 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
     const interval = setInterval(refresh, intervalMs)
     return () => clearInterval(interval)
   }, [state.connectionStatus, refresh, state.settings.refreshInterval])
+
+  // Register callback to refresh after service calls for real-time updates
+  useEffect(() => {
+    setServiceCallCallback(refresh)
+    return () => setServiceCallCallback(null)
+  }, [refresh])
 
   const value: HAContextValue = {
     ...state,

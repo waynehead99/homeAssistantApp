@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { ClimateEntity } from '../types/homeAssistant'
 import { callService } from '../services/homeAssistant'
 
@@ -40,6 +40,23 @@ const MODE_COLORS: Record<string, string> = {
 export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
   const [loading, setLoading] = useState(false)
   const [localTemp, setLocalTemp] = useState(entity.attributes.temperature || 72)
+  const pendingTempRef = useRef<number | null>(null)
+
+  // Sync local state when entity prop changes (from context updates)
+  // But don't overwrite if we have a pending change that HA hasn't confirmed yet
+  useEffect(() => {
+    const entityTemp = entity.attributes.temperature || 72
+
+    // If we have a pending temp and HA now matches it, clear the pending state
+    if (pendingTempRef.current !== null && entityTemp === pendingTempRef.current) {
+      pendingTempRef.current = null
+    }
+
+    // Only sync from entity if we don't have a pending change
+    if (pendingTempRef.current === null) {
+      setLocalTemp(entityTemp)
+    }
+  }, [entity.attributes.temperature])
 
   const currentTemp = entity.attributes.current_temperature
   const minTemp = entity.attributes.min_temp || 50
@@ -68,6 +85,7 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
   const handleTempChange = async (delta: number) => {
     const newTemp = Math.min(maxTemp, Math.max(minTemp, localTemp + delta))
     setLocalTemp(newTemp)
+    pendingTempRef.current = newTemp // Mark as pending until HA confirms
     setLoading(true)
     try {
       // Optimistic update
@@ -81,6 +99,7 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
       })
     } catch (error) {
       console.error('Failed to set temperature:', error)
+      pendingTempRef.current = null // Clear pending on error
       onUpdate(entity) // Revert
     } finally {
       setLoading(false)

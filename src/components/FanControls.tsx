@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { FanEntity } from '../types/homeAssistant'
 import { FanSupportedFeatures } from '../types/homeAssistant'
 import { callService } from '../services/homeAssistant'
@@ -18,6 +18,22 @@ const PRESET_ICONS: Record<string, string> = {
 export function FanControls({ entity, onUpdate }: FanControlsProps) {
   const [loading, setLoading] = useState(false)
   const [localPercentage, setLocalPercentage] = useState(entity.attributes.percentage || 0)
+  const pendingPercentageRef = useRef<number | null>(null)
+
+  // Sync local state when entity prop changes, but not if we have a pending change
+  useEffect(() => {
+    const entityPct = entity.attributes.percentage || 0
+
+    // If we have a pending percentage and HA now matches it, clear pending
+    if (pendingPercentageRef.current !== null && Math.abs(entityPct - pendingPercentageRef.current) <= 2) {
+      pendingPercentageRef.current = null
+    }
+
+    // Only sync from entity if we don't have a pending change
+    if (pendingPercentageRef.current === null) {
+      setLocalPercentage(entityPct)
+    }
+  }, [entity.attributes.percentage])
 
   const isOn = entity.state === 'on'
   const percentage = entity.attributes.percentage || 0
@@ -56,6 +72,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
   const handleSpeedCommit = async () => {
     if (localPercentage === percentage) return
 
+    pendingPercentageRef.current = localPercentage // Mark as pending until HA confirms
     setLoading(true)
     try {
       onUpdate({
@@ -69,6 +86,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
       })
     } catch (error) {
       console.error('Failed to set fan speed:', error)
+      pendingPercentageRef.current = null // Clear pending on error
       onUpdate(entity)
     } finally {
       setLoading(false)

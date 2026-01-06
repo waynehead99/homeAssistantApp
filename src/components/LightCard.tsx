@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import type { LightEntity } from '../types/homeAssistant'
 import { lightService } from '../services/homeAssistant'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
@@ -21,10 +21,20 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
   const friendlyName = light.attributes.friendly_name || light.entity_id.split('.')[1].replace(/_/g, ' ')
 
   const [localBrightness, setLocalBrightness] = useState(brightnessPct)
+  const pendingBrightnessRef = useRef<number | null>(null)
 
-  if (Math.abs(localBrightness - brightnessPct) > 5 && !isLoading) {
-    setLocalBrightness(brightnessPct)
-  }
+  // Sync local state when entity prop changes, but not if we have a pending change
+  useEffect(() => {
+    // If we have a pending brightness and HA now matches it (within tolerance), clear pending
+    if (pendingBrightnessRef.current !== null && Math.abs(brightnessPct - pendingBrightnessRef.current) <= 2) {
+      pendingBrightnessRef.current = null
+    }
+
+    // Only sync from entity if we don't have a pending change
+    if (pendingBrightnessRef.current === null) {
+      setLocalBrightness(brightnessPct)
+    }
+  }, [brightnessPct])
 
   const handleToggle = useCallback(async () => {
     setIsLoading(true)
@@ -51,6 +61,7 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
 
   const handleBrightnessChangeEnd = useCallback(
     async (value: number) => {
+      pendingBrightnessRef.current = value // Mark as pending until HA confirms
       setIsLoading(true)
       try {
         updateEntity({
@@ -64,6 +75,7 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
 
         await lightService.setBrightness(light.entity_id, value)
       } catch (error) {
+        pendingBrightnessRef.current = null // Clear pending on error
         updateEntity(light)
         setLocalBrightness(brightnessPct)
         console.error('Failed to set brightness:', error)

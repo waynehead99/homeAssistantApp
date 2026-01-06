@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { LightCard } from '../components/LightCard'
 import { SwitchCard } from '../components/SwitchCard'
@@ -11,15 +11,16 @@ import { FanControls } from '../components/FanControls'
 import { LockControls } from '../components/LockControls'
 import { CoverControls } from '../components/CoverControls'
 import { RelatedEntitiesSection } from '../components/RelatedEntitiesSection'
-import type { ClimateEntity, VacuumEntity, AlarmEntity, FanEntity, ValveEntity, LockEntity, CoverEntity } from '../types/homeAssistant'
+import type { ValveEntity } from '../types/homeAssistant'
 
-type ModalEntity =
-  | { type: 'climate'; entity: ClimateEntity }
-  | { type: 'vacuum'; entity: VacuumEntity }
-  | { type: 'alarm'; entity: AlarmEntity }
-  | { type: 'fan'; entity: FanEntity }
-  | { type: 'lock'; entity: LockEntity }
-  | { type: 'cover'; entity: CoverEntity }
+// Store only entity_id and type, look up actual entity from context for real-time updates
+type ModalEntityRef =
+  | { type: 'climate'; entityId: string }
+  | { type: 'vacuum'; entityId: string }
+  | { type: 'alarm'; entityId: string }
+  | { type: 'fan'; entityId: string }
+  | { type: 'lock'; entityId: string }
+  | { type: 'cover'; entityId: string }
   | null
 
 // Edit name modal component
@@ -96,12 +97,52 @@ export function RoomsView() {
     setCustomName,
     removeCustomName,
     getDisplayName,
-    updateEntity
+    updateEntity,
+    climate,
+    vacuums,
+    alarms,
+    fans,
+    locks,
+    covers,
   } = useHomeAssistantContext()
 
   const [expandedRooms, setExpandedRooms] = useState<Set<string>>(new Set())
   const [editingName, setEditingName] = useState<{ id: string; defaultName: string; type: 'room' | 'device' } | null>(null)
-  const [modalEntity, setModalEntity] = useState<ModalEntity>(null)
+  const [modalEntityRef, setModalEntityRef] = useState<ModalEntityRef>(null)
+
+  // Look up the actual entity from context - this updates when context updates
+  const modalEntity = useMemo(() => {
+    if (!modalEntityRef) return null
+
+    switch (modalEntityRef.type) {
+      case 'climate': {
+        const entity = climate.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'climate' as const, entity } : null
+      }
+      case 'vacuum': {
+        const entity = vacuums.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'vacuum' as const, entity } : null
+      }
+      case 'alarm': {
+        const entity = alarms.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'alarm' as const, entity } : null
+      }
+      case 'fan': {
+        const entity = fans.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'fan' as const, entity } : null
+      }
+      case 'lock': {
+        const entity = locks.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'lock' as const, entity } : null
+      }
+      case 'cover': {
+        const entity = covers.find(e => e.entity_id === modalEntityRef.entityId)
+        return entity ? { type: 'cover' as const, entity } : null
+      }
+      default:
+        return null
+    }
+  }, [modalEntityRef, climate, vacuums, alarms, fans, locks, covers])
   const [loadingEntities, setLoadingEntities] = useState<Set<string>>(new Set())
 
   const toggleRoom = (areaName: string) => {
@@ -434,7 +475,7 @@ export function RoomsView() {
                           </div>
                         )}
                         <button
-                          onClick={() => setModalEntity({ type: 'climate', entity })}
+                          onClick={() => setModalEntityRef({ type: 'climate', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
                             isActive ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
                           }`}
@@ -493,7 +534,7 @@ export function RoomsView() {
                           </div>
                         )}
                         <button
-                          onClick={() => setModalEntity({ type: 'vacuum', entity })}
+                          onClick={() => setModalEntityRef({ type: 'vacuum', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
                             isActive ? 'bg-green-500/20 border border-green-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
                           }`}
@@ -551,7 +592,7 @@ export function RoomsView() {
                           </div>
                         )}
                         <button
-                          onClick={() => setModalEntity({ type: 'alarm', entity })}
+                          onClick={() => setModalEntityRef({ type: 'alarm', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
                             isArmed ? 'bg-red-500/20 border border-red-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
                           }`}
@@ -669,7 +710,7 @@ export function RoomsView() {
                           </div>
                         )}
                         <button
-                          onClick={() => setModalEntity({ type: 'fan', entity })}
+                          onClick={() => setModalEntityRef({ type: 'fan', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
                             isOn ? 'bg-cyan-500/20 border border-cyan-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
                           }`}
@@ -728,7 +769,7 @@ export function RoomsView() {
                           </div>
                         )}
                         <button
-                          onClick={() => setModalEntity({ type: 'lock', entity })}
+                          onClick={() => setModalEntityRef({ type: 'lock', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
                             isLocked ? 'bg-green-500/20 border border-green-500/30' : 'bg-yellow-500/20 border border-yellow-500/30'
                           }`}
@@ -801,7 +842,7 @@ export function RoomsView() {
                           </div>
                         )}
                         <button
-                          onClick={() => setModalEntity({ type: 'cover', entity })}
+                          onClick={() => setModalEntityRef({ type: 'cover', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
                             isOpen ? 'bg-purple-500/20 border border-purple-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
                           }`}
@@ -874,7 +915,7 @@ export function RoomsView() {
       {/* Entity Control Modal */}
       <EntityControlModal
         isOpen={modalEntity !== null}
-        onClose={() => setModalEntity(null)}
+        onClose={() => setModalEntityRef(null)}
         title={getModalTitle()}
       >
         {modalEntity?.type === 'climate' && (
