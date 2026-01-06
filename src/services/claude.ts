@@ -54,19 +54,20 @@ Date: ${context.date}
     }
   }
 
-  // Calendar events
+  // Calendar events - group by day and clearly indicate when each event is
   if (context.calendar.length > 0) {
-    prompt += `Today's Events:\n`
+    prompt += `Upcoming Events:\n`
     context.calendar.forEach(event => {
+      const dayLabel = getEventDayLabel(event.start)
       const startTime = formatEventTime(event.start)
-      prompt += `- ${event.summary} at ${startTime}`
+      prompt += `- ${event.summary} ${dayLabel} at ${startTime}`
       if (event.location) {
         prompt += ` (${event.location})`
       }
       prompt += '\n'
     })
   } else {
-    prompt += `Calendar: No events scheduled\n`
+    prompt += `Calendar: No events scheduled today or tomorrow\n`
   }
 
   // People status
@@ -157,6 +158,7 @@ Important guidelines:
 - This is a normal family home, NOT a security facility
 - Open doors during daytime are normal - only mention if unusual (like leaving for work with garage open)
 - Be positive and helpful, not alarming
+- IMPORTANT: Pay attention to event dates! Events labeled "tomorrow" are NOT happening today. Only mention today's events as current/upcoming. Tomorrow's events can be mentioned as "coming up tomorrow" but don't treat them as happening now.
 - If nothing notable, share a friendly weather observation or day-appropriate tip
 
 Respond with only 1-2 friendly sentences. No greetings, sign-offs, or security warnings.`
@@ -179,6 +181,30 @@ function formatEventTime(isoString: string): string {
     return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
   } catch {
     return isoString
+  }
+}
+
+function getEventDayLabel(isoString: string): string {
+  try {
+    const eventDate = new Date(isoString)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    // Reset times to compare dates only
+    const eventDay = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate())
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const tomorrowDay = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate())
+
+    if (eventDay.getTime() === todayDay.getTime()) {
+      return 'today'
+    } else if (eventDay.getTime() === tomorrowDay.getTime()) {
+      return 'tomorrow'
+    } else {
+      return eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+    }
+  } catch {
+    return 'upcoming'
   }
 }
 
