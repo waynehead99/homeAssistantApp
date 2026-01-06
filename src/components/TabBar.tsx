@@ -135,7 +135,7 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 glass-card rounded-none border-b-0 border-x-0 pb-safe z-30 !overflow-visible">
       <div className="max-w-3xl mx-auto flex justify-around relative">
         {primaryTabs.map((tab) => {
           const isActive = activeTab === tab.id
@@ -143,11 +143,13 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center py-2 px-4 min-w-[64px] transition-colors ${
-                isActive ? 'text-blue-400' : 'text-slate-500'
+              className={`flex flex-col items-center py-2 px-4 min-w-[64px] transition-all duration-300 ${
+                isActive ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'
               }`}
             >
-              {tab.icon(isActive)}
+              <div className={`transition-all duration-300 ${isActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''}`}>
+                {tab.icon(isActive)}
+              </div>
               <span className={`text-xs mt-1 ${isActive ? 'font-medium' : ''}`}>
                 {tab.label}
               </span>
@@ -159,13 +161,15 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setShowMore(!showMore)}
-            className={`flex flex-col items-center py-2 px-4 min-w-[64px] transition-colors ${
-              isSecondaryActive || showMore ? 'text-blue-400' : 'text-slate-500'
+            className={`flex flex-col items-center py-2 px-4 min-w-[64px] transition-all duration-300 ${
+              isSecondaryActive || showMore ? 'text-blue-400' : 'text-slate-500 hover:text-slate-300'
             }`}
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-            </svg>
+            <div className={`transition-all duration-300 ${isSecondaryActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''}`}>
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+              </svg>
+            </div>
             <span className={`text-xs mt-1 ${isSecondaryActive || showMore ? 'font-medium' : ''}`}>
               More
             </span>
@@ -173,20 +177,22 @@ export function TabBar({ activeTab, onTabChange }: TabBarProps) {
 
           {/* Popup menu */}
           {showMore && (
-            <div className="absolute bottom-full right-0 mb-2 bg-slate-800 rounded-xl border border-slate-700 shadow-xl overflow-hidden min-w-[160px]">
+            <div className="absolute bottom-full right-0 mb-2 glass-card shadow-glass-lg overflow-hidden min-w-[160px] z-50">
               {secondaryTabs.map((tab) => {
                 const isActive = activeTab === tab.id
                 return (
                   <button
                     key={tab.id}
                     onClick={() => handleSecondaryTabClick(tab.id)}
-                    className={`flex items-center gap-3 w-full px-4 py-3 transition-colors ${
+                    className={`flex items-center gap-3 w-full px-4 py-3 transition-all duration-200 ${
                       isActive
                         ? 'bg-blue-500/20 text-blue-400'
-                        : 'text-slate-300 hover:bg-slate-700'
+                        : 'text-slate-300 hover:bg-white/5'
                     }`}
                   >
-                    {tab.icon(isActive)}
+                    <div className={`transition-all duration-300 ${isActive ? 'drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]' : ''}`}>
+                      {tab.icon(isActive)}
+                    </div>
                     <span className={`text-sm ${isActive ? 'font-medium' : ''}`}>
                       {tab.label}
                     </span>

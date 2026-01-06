@@ -191,16 +191,16 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
       {/* Status Display */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-3xl font-light text-white">
+          <div className="text-3xl font-light text-white text-shadow">
             {supportsSetPosition ? `${position}%` : (isOpen ? 'Open' : 'Closed')}
           </div>
           <div className="text-sm text-slate-400">{getStatusLabel()}</div>
         </div>
         <div
-          className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+          className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${
             isOpen
-              ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
-              : 'bg-slate-700 text-slate-400'
+              ? 'bg-gradient-to-br from-blue-400/30 to-cyan-500/20 text-blue-400 glow-blue'
+              : 'glass-panel text-slate-400'
           }`}
         >
           <svg
@@ -219,10 +219,10 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
           <button
             onClick={handleOpen}
             disabled={isOpen && !isMoving}
-            className={`flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all ${
+            className={`flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 ${
               isOpen && !isMoving
-                ? 'bg-slate-700/30 text-slate-600 cursor-not-allowed'
-                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 active:scale-95'
+                ? 'glass-panel opacity-40 text-slate-600 cursor-not-allowed'
+                : 'glass-panel text-slate-300 hover:bg-white/10 active:scale-95'
             }`}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -235,7 +235,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
         {supportsStop && (
           <button
             onClick={handleStop}
-            className="flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all bg-slate-700/50 text-slate-300 hover:bg-slate-700 active:scale-95"
+            className="flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 glass-panel text-slate-300 hover:bg-white/10 active:scale-95"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 6h12v12H6z"/>
@@ -248,10 +248,10 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
           <button
             onClick={handleClose}
             disabled={isClosed && !isMoving}
-            className={`flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all ${
+            className={`flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 ${
               isClosed && !isMoving
-                ? 'bg-slate-700/30 text-slate-600 cursor-not-allowed'
-                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700 active:scale-95'
+                ? 'glass-panel opacity-40 text-slate-600 cursor-not-allowed'
+                : 'glass-panel text-slate-300 hover:bg-white/10 active:scale-95'
             }`}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -264,7 +264,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
 
       {/* Position Slider */}
       {supportsSetPosition && (
-        <div className="bg-slate-700/50 rounded-xl p-4">
+        <div className="glass-panel p-4">
           <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Position</div>
           <div className="flex items-center gap-4">
             <span className="text-slate-500 text-sm w-12">Closed</span>
@@ -277,7 +277,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
               onChange={(e) => handlePositionChange(Number(e.target.value))}
               onMouseUp={handlePositionCommit}
               onTouchEnd={handlePositionCommit}
-              className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="slider-3d flex-1"
             />
             <span className="text-slate-500 text-sm w-10 text-right">Open</span>
           </div>
@@ -287,7 +287,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
 
       {/* Tilt Position Slider */}
       {supportsTilt && (
-        <div className="bg-slate-700/50 rounded-xl p-4">
+        <div className="glass-panel p-4">
           <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Tilt</div>
           <div className="flex items-center gap-4">
             <span className="text-slate-500 text-sm w-8">0°</span>
@@ -300,7 +300,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
               onChange={(e) => handleTiltChange(Number(e.target.value))}
               onMouseUp={handleTiltCommit}
               onTouchEnd={handleTiltCommit}
-              className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              className="slider-3d flex-1"
             />
             <span className="text-slate-500 text-sm w-12 text-right">90°</span>
           </div>

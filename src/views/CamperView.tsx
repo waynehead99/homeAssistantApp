@@ -103,9 +103,9 @@ function BatteryGauge({ soc, voltage, current, power, systemState, timeToEmpty }
   }
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-6">
+    <div className="glass-card p-6 glow-green">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-white text-shadow flex items-center gap-2">
           <svg className="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="currentColor">
             <path d="M17 4h-3V2h-4v2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2zm0 18H7V6h10v16z"/>
             <path d="M9 8h6v10H9z" opacity={0.3}/>
@@ -184,10 +184,8 @@ function SolarCard({ power, voltage, current, yieldToday }: {
   const isProducing = (power ?? 0) > 10
 
   return (
-    <div className={`rounded-2xl p-5 transition-all ${
-      isProducing
-        ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30'
-        : 'bg-slate-800'
+    <div className={`glass-card p-5 transition-all ${
+      isProducing ? 'glow-yellow bg-gradient-to-br from-yellow-500/10 to-orange-500/10' : ''
     }`}>
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -206,25 +204,25 @@ function SolarCard({ power, voltage, current, yieldToday }: {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-black/20 rounded-xl p-3">
+        <div className="glass-panel p-3">
           <p className="text-xs text-slate-400 mb-1">Power</p>
-          <p className={`text-xl font-bold ${isProducing ? 'text-yellow-400' : 'text-slate-500'}`}>
+          <p className={`text-xl font-bold text-shadow ${isProducing ? 'text-yellow-400' : 'text-slate-500'}`}>
             {formatValue(power, 'W', 0)}
           </p>
         </div>
-        <div className="bg-black/20 rounded-xl p-3">
+        <div className="glass-panel p-3">
           <p className="text-xs text-slate-400 mb-1">Today</p>
-          <p className="text-xl font-bold text-white">
+          <p className="text-xl font-bold text-white text-shadow">
             {formatValue(yieldToday, 'kWh', 2)}
           </p>
         </div>
-        <div className="bg-black/20 rounded-xl p-3">
+        <div className="glass-panel p-3">
           <p className="text-xs text-slate-400 mb-1">Voltage</p>
-          <p className="text-lg font-medium text-white">{formatValue(voltage, 'V')}</p>
+          <p className="text-lg font-medium text-white text-shadow">{formatValue(voltage, 'V')}</p>
         </div>
-        <div className="bg-black/20 rounded-xl p-3">
+        <div className="glass-panel p-3">
           <p className="text-xs text-slate-400 mb-1">Current</p>
-          <p className="text-lg font-medium text-white">{formatValue(current, 'A')}</p>
+          <p className="text-lg font-medium text-white text-shadow">{formatValue(current, 'A')}</p>
         </div>
       </div>
     </div>
@@ -240,10 +238,8 @@ function GridCard({ connected, l1Power, l2Power }: {
   const totalPower = (l1Power ?? 0) + (l2Power ?? 0)
 
   return (
-    <div className={`rounded-2xl p-5 transition-all ${
-      connected
-        ? 'bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30'
-        : 'bg-slate-800'
+    <div className={`glass-card p-5 transition-all ${
+      connected ? 'glow-blue bg-gradient-to-br from-blue-500/10 to-cyan-500/10' : ''
     }`}>
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -263,23 +259,23 @@ function GridCard({ connected, l1Power, l2Power }: {
 
       {connected ? (
         <div className="space-y-3">
-          <div className="bg-black/20 rounded-xl p-3">
+          <div className="glass-panel p-3">
             <p className="text-xs text-slate-400 mb-1">Total Power</p>
-            <p className="text-xl font-bold text-blue-400">{formatValue(totalPower, 'W', 0)}</p>
+            <p className="text-xl font-bold text-blue-400 text-shadow">{formatValue(totalPower, 'W', 0)}</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-black/20 rounded-xl p-3">
+            <div className="glass-panel p-3">
               <p className="text-xs text-slate-400 mb-1">L1</p>
-              <p className="text-lg font-medium text-white">{formatValue(l1Power, 'W', 0)}</p>
+              <p className="text-lg font-medium text-white text-shadow">{formatValue(l1Power, 'W', 0)}</p>
             </div>
-            <div className="bg-black/20 rounded-xl p-3">
+            <div className="glass-panel p-3">
               <p className="text-xs text-slate-400 mb-1">L2</p>
-              <p className="text-lg font-medium text-white">{formatValue(l2Power, 'W', 0)}</p>
+              <p className="text-lg font-medium text-white text-shadow">{formatValue(l2Power, 'W', 0)}</p>
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-black/20 rounded-xl p-4 text-center">
+        <div className="glass-panel p-4 text-center">
           <p className="text-slate-500">Not connected to shore power</p>
         </div>
       )}
@@ -294,10 +290,8 @@ function ACLoadsCard({ power }: {
   const isActive = (power ?? 0) > 5
 
   return (
-    <div className={`rounded-2xl p-5 transition-all ${
-      isActive
-        ? 'bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30'
-        : 'bg-slate-800'
+    <div className={`glass-card p-5 transition-all ${
+      isActive ? 'glow-orange bg-gradient-to-br from-orange-500/10 to-red-500/10' : ''
     }`}>
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
@@ -315,9 +309,9 @@ function ACLoadsCard({ power }: {
         </div>
       </div>
 
-      <div className="bg-black/20 rounded-xl p-3">
+      <div className="glass-panel p-3">
         <p className="text-xs text-slate-400 mb-1">Power</p>
-        <p className={`text-xl font-bold ${isActive ? 'text-orange-400' : 'text-slate-500'}`}>
+        <p className={`text-xl font-bold text-shadow ${isActive ? 'text-orange-400' : 'text-slate-500'}`}>
           {formatValue(power, 'W', 0)}
         </p>
       </div>
@@ -333,7 +327,7 @@ function LoadsCard({ power, current }: {
   const isActive = (power ?? 0) > 5
 
   return (
-    <div className="bg-slate-800 rounded-2xl p-5">
+    <div className={`glass-card p-5 ${isActive ? 'glow-purple' : ''}`}>
       <div className="flex items-center gap-3 mb-4">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
           isActive ? 'bg-purple-500' : 'bg-slate-700'
@@ -351,15 +345,15 @@ function LoadsCard({ power, current }: {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-black/20 rounded-xl p-3">
+        <div className="glass-panel p-3">
           <p className="text-xs text-slate-400 mb-1">Power</p>
-          <p className={`text-xl font-bold ${isActive ? 'text-purple-400' : 'text-slate-500'}`}>
+          <p className={`text-xl font-bold text-shadow ${isActive ? 'text-purple-400' : 'text-slate-500'}`}>
             {formatValue(power, 'W', 0)}
           </p>
         </div>
-        <div className="bg-black/20 rounded-xl p-3">
+        <div className="glass-panel p-3">
           <p className="text-xs text-slate-400 mb-1">Current</p>
-          <p className="text-lg font-medium text-white">{formatValue(current, 'A')}</p>
+          <p className="text-lg font-medium text-white text-shadow">{formatValue(current, 'A')}</p>
         </div>
       </div>
     </div>
@@ -372,9 +366,9 @@ function SensorRow({ sensor }: { sensor: SensorEntity }) {
   const unit = sensor.attributes.unit_of_measurement || ''
 
   return (
-    <div className="flex justify-between items-center py-2 border-b border-slate-700/50 last:border-0">
+    <div className="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
       <span className="text-sm text-slate-400 truncate mr-2">{name}</span>
-      <span className="text-sm font-medium text-white whitespace-nowrap">
+      <span className="text-sm font-medium text-white text-shadow whitespace-nowrap">
         {formatValue(sensor.state, unit)}
       </span>
     </div>
@@ -463,13 +457,13 @@ export function CamperView() {
   if (camperSensors.length === 0) {
     return (
       <div className="p-4 pb-24">
-        <div className="bg-slate-800 rounded-2xl p-6 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-700 flex items-center justify-center">
+        <div className="glass-card p-6 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full glass-panel flex items-center justify-center">
             <svg className="w-8 h-8 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
             </svg>
           </div>
-          <p className="text-slate-400 mb-2">No Camper sensors found</p>
+          <p className="text-slate-400 mb-2 text-shadow">No Camper sensors found</p>
           <p className="text-sm text-slate-500">
             Looking for Victron sensors in the "Camper" room
           </p>
@@ -524,8 +518,8 @@ export function CamperView() {
 
       {/* Other Sensors */}
       {otherSensors.length > 0 && (
-        <div className="bg-slate-800 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+        <div className="glass-card p-5">
+          <h3 className="text-lg font-semibold text-white text-shadow mb-3 flex items-center gap-2">
             <svg className="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
             </svg>
@@ -546,8 +540,8 @@ export function CamperView() {
 
       {/* System Status */}
       {camperBinarySensors.length > 0 && (
-        <div className="bg-slate-800 rounded-2xl p-5">
-          <h3 className="text-lg font-semibold text-white mb-3">System Status</h3>
+        <div className="glass-card p-5">
+          <h3 className="text-lg font-semibold text-white text-shadow mb-3">System Status</h3>
           <div className="grid grid-cols-2 gap-2">
             {camperBinarySensors.map(sensor => {
               const name = sensor.attributes.friendly_name || sensor.entity_id.split('.')[1].replace(/_/g, ' ')
@@ -555,10 +549,10 @@ export function CamperView() {
               return (
                 <div
                   key={sensor.entity_id}
-                  className={`px-3 py-2 rounded-lg text-sm ${
+                  className={`glass-panel px-3 py-2 rounded-lg text-sm transition-all ${
                     isOn
-                      ? 'bg-emerald-500/20 text-emerald-400'
-                      : 'bg-slate-700/50 text-slate-400'
+                      ? 'bg-emerald-500/20 text-emerald-400 glow-green'
+                      : 'text-slate-400'
                   }`}
                 >
                   {name}

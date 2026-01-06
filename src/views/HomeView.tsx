@@ -141,20 +141,20 @@ export function HomeView() {
     <div className="space-y-4 pb-20">
       {/* AI Insights Card - only show when enabled */}
       {settings.aiInsightsEnabled && (
-        <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 border border-purple-500/30 rounded-2xl p-4">
+        <div className="glass-card bg-gradient-to-br from-purple-600/20 to-blue-600/20 p-4 glow-purple">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-5 h-5 text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
-              <h3 className="font-medium text-purple-300">AI Insights</h3>
+              <h3 className="font-medium text-purple-300 text-shadow">AI Insights</h3>
             </div>
             <button
               onClick={refreshInsight}
               disabled={loading}
-              className="p-1.5 text-purple-400 hover:text-purple-300 hover:bg-purple-500/20 rounded-lg transition-colors disabled:opacity-50"
+              className="glass-button p-1.5 text-purple-400 hover:text-purple-300 rounded-lg transition-all disabled:opacity-50"
             >
               <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -163,7 +163,7 @@ export function HomeView() {
           </div>
           <p className="text-slate-200 text-sm leading-relaxed">
             {loading ? (
-              <span className="text-slate-400">Analyzing your home...</span>
+              <span className="text-slate-400 animate-pulse">Analyzing your home...</span>
             ) : insight ? (
               insight
             ) : (
@@ -351,13 +351,13 @@ export function HomeView() {
                   key={entity.entity_id}
                   onClick={() => handleEntityClick(entity)}
                   disabled={isLoading}
-                  className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
+                  className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
                     isActive
-                      ? `${colors.bg} ring-1 ${colors.ring}`
-                      : 'bg-slate-800'
+                      ? `glass-card ${colors.bg} ring-1 ${colors.ring}`
+                      : 'glass-panel hover:bg-white/5'
                   } ${isLoading ? 'opacity-50' : ''}`}
                 >
-                  <div className={`p-2 rounded-lg ${isActive ? colors.bg : 'bg-slate-700'}`}>
+                  <div className={`p-2 rounded-lg transition-all duration-300 ${isActive ? colors.bg : 'bg-slate-700/50'}`}>
                     {renderIcon()}
                   </div>
                   <div className="flex-1 text-left min-w-0">

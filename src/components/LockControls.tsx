@@ -82,10 +82,10 @@ export function LockControls({ entity, onUpdate }: LockControlsProps) {
         <button
           onClick={handleLock}
           disabled={loading || isLocked || isLocking}
-          className={`py-4 px-6 rounded-xl font-semibold text-lg transition-all ${
+          className={`py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${
             isLocked
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-              : 'bg-slate-700 text-white hover:bg-green-500 hover:text-white'
+              ? 'bg-gradient-to-br from-green-400/20 to-emerald-500/10 text-green-400 ring-1 ring-green-400/30 glow-green'
+              : 'glass-panel text-white hover:bg-green-500/20 hover:text-green-300'
           } ${(loading || isLocking) ? 'opacity-50' : ''}`}
         >
           <div className="flex flex-col items-center gap-1">
@@ -97,10 +97,10 @@ export function LockControls({ entity, onUpdate }: LockControlsProps) {
         <button
           onClick={handleUnlock}
           disabled={loading || isUnlocked || isUnlocking}
-          className={`py-4 px-6 rounded-xl font-semibold text-lg transition-all ${
+          className={`py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 ${
             isUnlocked
-              ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-              : 'bg-slate-700 text-white hover:bg-yellow-500 hover:text-black'
+              ? 'bg-gradient-to-br from-yellow-400/20 to-amber-500/10 text-yellow-400 ring-1 ring-yellow-400/30 glow-yellow'
+              : 'glass-panel text-white hover:bg-yellow-500/20 hover:text-yellow-300'
           } ${(loading || isUnlocking) ? 'opacity-50' : ''}`}
         >
           <div className="flex flex-col items-center gap-1">
@@ -112,7 +112,7 @@ export function LockControls({ entity, onUpdate }: LockControlsProps) {
 
       {/* Jammed Warning */}
       {isJammed && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-center">
+        <div className="glass-panel bg-red-500/10 border-red-500/30 p-4 text-center glow-red">
           <p className="text-red-400 font-medium">Lock is jammed!</p>
           <p className="text-sm text-slate-400 mt-1">Check the lock mechanism</p>
         </div>

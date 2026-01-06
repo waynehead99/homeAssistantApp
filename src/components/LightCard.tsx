@@ -80,16 +80,20 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
 
   return (
     <div
-      className={`bg-slate-800 rounded-xl p-4 transition-all ${
-        isOn ? 'ring-1 ring-yellow-400/30 bg-slate-800/80' : ''
+      className={`glass-card p-4 transition-all duration-300 ${
+        isOn ? 'glow-yellow' : ''
       } ${isLoading ? 'opacity-75' : ''}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className={`p-2 rounded-lg ${isOn ? 'bg-yellow-400/20' : 'bg-slate-700'}`}>
+          <div className={`p-2.5 rounded-xl transition-all duration-300 ${
+            isOn
+              ? 'bg-gradient-to-br from-yellow-400/30 to-amber-500/20 shadow-inner-light'
+              : 'glass-panel'
+          }`}>
             <LightBulbIcon
-              className={`w-5 h-5 ${isOn ? 'text-yellow-400' : 'text-slate-500'}`}
+              className={`w-5 h-5 transition-all duration-300 ${isOn ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-slate-500'}`}
               filled={isOn}
             />
           </div>
@@ -127,15 +131,15 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
           <button
             onClick={handleToggle}
             disabled={isLoading}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              isOn ? 'bg-yellow-400' : 'bg-slate-600'
+            className={`toggle-3d relative w-12 h-7 rounded-full transition-all duration-300 ${
+              isOn ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-slate-700'
             } ${isLoading ? 'cursor-wait' : 'cursor-pointer'}`}
             role="switch"
             aria-checked={isOn}
           >
             <div
-              className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
-                isOn ? 'translate-x-5' : 'translate-x-0.5'
+              className={`toggle-3d-knob w-5 h-5 top-1 bg-gradient-to-b from-white to-slate-100 rounded-full transition-transform duration-300 ${
+                isOn ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>

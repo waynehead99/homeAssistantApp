@@ -91,9 +91,12 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <div className="min-h-screen bg-slate-950 overflow-x-hidden">
+      {/* Gradient mesh background */}
+      <div className="fixed inset-0 bg-gradient-mesh pointer-events-none" />
+
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-lg border-b border-slate-800 sticky top-0 z-10">
+      <header className="glass-card sticky top-0 z-20 rounded-none border-t-0 border-x-0">
         <div className="max-w-3xl mx-auto px-4 py-2">
           {/* Top row: Title, Weather, Connection */}
           <div className="flex items-center justify-between">
@@ -126,7 +129,7 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
               {/* Refresh button */}
               <button
                 onClick={handleRefresh}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                className="glass-button p-1.5 text-slate-400 hover:text-white rounded-lg"
                 title="Refresh"
               >
                 <RefreshIcon className="w-4 h-4" />
@@ -160,7 +163,7 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
               {lockSummary && (
                 <button
                   onClick={() => setModalEntity({ type: 'lock', entity: visibleLocks[0] })}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-colors ${lockSummary.bgColor} hover:opacity-80`}
+                  className={`glass-button flex items-center gap-1 px-2.5 py-1.5 rounded-lg ${lockSummary.bgColor}`}
                 >
                   <span className="text-xs">{lockSummary.icon}</span>
                   <span className={`text-xs font-medium ${lockSummary.color}`}>{lockSummary.text}</span>
@@ -171,7 +174,7 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
               {alarmStatus && primaryAlarm && (
                 <button
                   onClick={() => setModalEntity({ type: 'alarm', entity: primaryAlarm })}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-colors ${alarmStatus.bgColor} hover:opacity-80`}
+                  className={`glass-button flex items-center gap-1 px-2.5 py-1.5 rounded-lg ${alarmStatus.bgColor}`}
                 >
                   <span className="text-xs">🛡️</span>
                   <span className={`text-xs font-medium ${alarmStatus.color}`}>{alarmStatus.text}</span>
@@ -183,7 +186,7 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
       </header>
 
       {/* Main content */}
-      <main className="max-w-3xl mx-auto px-4 py-4">{children}</main>
+      <main className="relative max-w-3xl mx-auto px-4 py-4 pb-safe">{children}</main>
 
       {/* Control Modal */}
       <EntityControlModal
@@ -202,7 +205,7 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
             />
             {/* Show all locks if there are multiple */}
             {visibleLocks.length > 1 && (
-              <div className="mt-6 pt-4 border-t border-slate-700">
+              <div className="mt-6 pt-4 border-t border-white/5">
                 <h4 className="text-sm font-medium text-slate-400 mb-3">All Locks</h4>
                 <div className="space-y-2">
                   {visibleLocks.map(lock => {
@@ -217,8 +220,10 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
                       <button
                         key={lock.entity_id}
                         onClick={() => setModalEntity({ type: 'lock', entity: lock })}
-                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-colors ${
-                          isSelected ? 'bg-blue-500/20 ring-1 ring-blue-500/30' : 'bg-slate-800 hover:bg-slate-700'
+                        className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
+                          isSelected
+                            ? 'glass-panel ring-1 ring-blue-400/30 glow-blue'
+                            : 'glass-panel hover:bg-white/5'
                         }`}
                       >
                         <div className="flex items-center gap-3">

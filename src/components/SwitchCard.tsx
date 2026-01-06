@@ -36,14 +36,18 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
 
   return (
     <div
-      className={`bg-slate-800 rounded-xl p-4 transition-all ${
-        isOn ? 'ring-1 ring-green-400/30' : ''
+      className={`glass-card p-4 transition-all duration-300 ${
+        isOn ? 'glow-green' : ''
       } ${isLoading ? 'opacity-75' : ''}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className={`p-2 rounded-lg ${isOn ? 'bg-green-400/20' : 'bg-slate-700'}`}>
-            <PowerIcon className={`w-5 h-5 ${isOn ? 'text-green-400' : 'text-slate-500'}`} />
+          <div className={`p-2.5 rounded-xl transition-all duration-300 ${
+            isOn
+              ? 'bg-gradient-to-br from-green-400/30 to-emerald-500/20 shadow-inner-light'
+              : 'glass-panel'
+          }`}>
+            <PowerIcon className={`w-5 h-5 transition-all duration-300 ${isOn ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-slate-500'}`} />
           </div>
           <div className="min-w-0">
             {onEditName ? (
@@ -77,15 +81,15 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
           <button
             onClick={handleToggle}
             disabled={isLoading}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              isOn ? 'bg-green-400' : 'bg-slate-600'
+            className={`toggle-3d relative w-12 h-7 rounded-full transition-all duration-300 ${
+              isOn ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-slate-700'
             } ${isLoading ? 'cursor-wait' : 'cursor-pointer'}`}
             role="switch"
             aria-checked={isOn}
           >
             <div
-              className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
-                isOn ? 'translate-x-5' : 'translate-x-0.5'
+              className={`toggle-3d-knob w-5 h-5 top-1 bg-gradient-to-b from-white to-slate-100 rounded-full transition-transform duration-300 ${
+                isOn ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>

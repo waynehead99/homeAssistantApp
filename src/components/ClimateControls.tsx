@@ -111,21 +111,21 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
 
       {/* Target Temperature Control */}
       {currentMode !== 'off' && currentMode !== 'fan_only' && (
-        <div className="bg-slate-700/50 rounded-xl p-4">
+        <div className="glass-panel p-4">
           <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Target Temperature</div>
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={() => handleTempChange(-1)}
-              className="w-12 h-12 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-2xl font-light transition-colors flex items-center justify-center"
+              className="w-12 h-12 rounded-full glass-button text-white text-2xl font-light transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
             >
               -
             </button>
-            <div className="text-4xl font-light text-white min-w-[80px] text-center">
+            <div className="text-4xl font-light text-white min-w-[80px] text-center text-shadow">
               {Math.round(localTemp)}°
             </div>
             <button
               onClick={() => handleTempChange(1)}
-              className="w-12 h-12 rounded-full bg-slate-600 hover:bg-slate-500 text-white text-2xl font-light transition-colors flex items-center justify-center"
+              className="w-12 h-12 rounded-full glass-button text-white text-2xl font-light transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
             >
               +
             </button>
@@ -147,10 +147,10 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
               <button
                 key={mode}
                 onClick={() => handleModeChange(mode)}
-                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-300 ${
                   isActive
-                    ? `${colors} ring-1 ring-current`
-                    : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
+                    ? `${colors} ring-1 ring-current shadow-lg`
+                    : 'glass-panel text-slate-400 hover:bg-white/5'
                 }`}
               >
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">

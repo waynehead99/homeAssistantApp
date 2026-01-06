@@ -99,10 +99,10 @@ export function AlarmControls({ entity, onUpdate }: AlarmControlsProps) {
 
       {/* Keypad for code entry */}
       {showKeypad && (
-        <div className="bg-slate-700/50 rounded-xl p-4">
+        <div className="glass-panel p-4">
           <div className="text-xs text-slate-400 uppercase tracking-wide mb-3 text-center">Enter Code</div>
           <div className="flex justify-center mb-4">
-            <div className="bg-slate-800 rounded-lg px-4 py-2 min-w-[120px] text-center">
+            <div className="glass-panel px-4 py-2 min-w-[120px] text-center">
               <span className="text-2xl tracking-widest text-white">
                 {'•'.repeat(code.length) || '----'}
               </span>
@@ -113,10 +113,10 @@ export function AlarmControls({ entity, onUpdate }: AlarmControlsProps) {
               <button
                 key={key}
                 onClick={() => handleKeypadPress(key)}
-                className={`p-3 rounded-lg text-lg font-medium transition-colors ${
+                className={`p-3 rounded-lg text-lg font-medium transition-all duration-200 ${
                   key === 'clear' || key === 'back'
-                    ? 'bg-slate-600 text-slate-300 hover:bg-slate-500 text-sm'
-                    : 'bg-slate-700 text-white hover:bg-slate-600'
+                    ? 'glass-panel text-slate-300 hover:bg-white/10 text-sm'
+                    : 'glass-button text-white hover:bg-white/15 active:scale-95'
                 }`}
               >
                 {key === 'clear' ? 'CLR' : key === 'back' ? 'DEL' : key}
@@ -133,7 +133,7 @@ export function AlarmControls({ entity, onUpdate }: AlarmControlsProps) {
           <div className="grid grid-cols-3 gap-2">
             <button
               onClick={() => handleArm('home')}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-400 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-400 transition-all duration-300 active:scale-95"
             >
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -142,7 +142,7 @@ export function AlarmControls({ entity, onUpdate }: AlarmControlsProps) {
             </button>
             <button
               onClick={() => handleArm('away')}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-red-400/10 hover:bg-red-400/20 text-red-400 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-red-400/10 hover:bg-red-400/20 text-red-400 transition-all duration-300 active:scale-95"
             >
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
@@ -151,7 +151,7 @@ export function AlarmControls({ entity, onUpdate }: AlarmControlsProps) {
             </button>
             <button
               onClick={() => handleArm('night')}
-              className="flex flex-col items-center gap-2 p-4 rounded-xl bg-purple-400/10 hover:bg-purple-400/20 text-purple-400 transition-colors"
+              className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-purple-400/10 hover:bg-purple-400/20 text-purple-400 transition-all duration-300 active:scale-95"
             >
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M9 2c-1.05 0-2.05.16-3 .46 4.06 1.27 7 5.06 7 9.54 0 4.48-2.94 8.27-7 9.54.95.3 1.95.46 3 .46 5.52 0 10-4.48 10-10S14.52 2 9 2z" />
@@ -166,7 +166,7 @@ export function AlarmControls({ entity, onUpdate }: AlarmControlsProps) {
       {(isArmed || currentState === 'triggered' || currentState === 'pending') && (
         <button
           onClick={handleDisarm}
-          className="w-full py-4 rounded-xl bg-green-500 hover:bg-green-400 text-white font-semibold text-lg transition-colors"
+          className="w-full py-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-400 hover:from-green-400 hover:to-emerald-300 text-white font-semibold text-lg transition-all duration-300 shadow-lg shadow-green-500/30 active:scale-98"
         >
           Disarm
         </button>

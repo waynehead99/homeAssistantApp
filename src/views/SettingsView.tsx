@@ -221,12 +221,12 @@ export function SettingsView() {
   return (
     <div className="space-y-6 pb-20">
       {/* Weather Entity Selection */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <h3 className="text-sm font-medium text-slate-400 mb-3">Weather Source</h3>
         <select
           value={settings.primaryWeatherEntity || ''}
           onChange={(e) => handleWeatherChange(e.target.value)}
-          className="w-full bg-slate-700 text-white rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         >
           <option value="">Auto (first available)</option>
           {weather.map((w) => (
@@ -241,12 +241,12 @@ export function SettingsView() {
       </section>
 
       {/* Quick Access Entities */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-slate-400">Quick Access</h3>
           <button
             onClick={() => setShowEntityPicker(!showEntityPicker)}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors"
+            className="glass-button px-3 py-1.5 bg-blue-600/80 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors"
           >
             {showEntityPicker ? 'Done' : 'Add Entities'}
           </button>
@@ -264,7 +264,7 @@ export function SettingsView() {
               return (
                 <div
                   key={entity.entity_id}
-                  className="flex items-center justify-between bg-slate-700/50 rounded-lg px-3 py-2"
+                  className="flex items-center justify-between glass-panel rounded-lg px-3 py-2"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500">
@@ -292,15 +292,15 @@ export function SettingsView() {
 
         {/* Entity picker */}
         {showEntityPicker && (
-          <div className="border-t border-slate-700 pt-3 mt-3">
+          <div className="border-t border-white/5 pt-3 mt-3">
             <input
               type="text"
               value={entityFilter}
               onChange={(e) => setEntityFilter(e.target.value)}
               placeholder="Search entities..."
-              className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 mb-3 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full glass-panel text-white rounded-lg px-3 py-2 mb-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
             />
-            <div className="max-h-64 overflow-y-auto space-y-1">
+            <div className="max-h-64 overflow-y-auto space-y-1 scrollbar-hide">
               {filteredEntities.map(entity => {
                 const name = getDisplayName(entity.entity_id, entity.attributes.friendly_name || entity.entity_id.split('.')[1])
                 const isPinned = (settings.pinnedEntities || []).includes(entity.entity_id)
@@ -309,7 +309,7 @@ export function SettingsView() {
                     key={entity.entity_id}
                     onClick={() => togglePinnedEntity(entity.entity_id)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
-                      isPinned ? 'bg-blue-600/20 text-blue-400' : 'bg-slate-700/30 text-slate-300 hover:bg-slate-700'
+                      isPinned ? 'glass-panel bg-blue-600/20 text-blue-400' : 'glass-panel text-slate-300 hover:bg-white/5'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -333,12 +333,12 @@ export function SettingsView() {
       </section>
 
       {/* Automations for Home Page */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-medium text-slate-400">Home Page Automations</h3>
           <button
             onClick={() => setShowAutomationPicker(!showAutomationPicker)}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm text-white transition-colors"
+            className="glass-button px-3 py-1.5 bg-emerald-600/80 hover:bg-emerald-500 rounded-lg text-sm text-white transition-colors"
           >
             {showAutomationPicker ? 'Done' : 'Add Automations'}
           </button>
@@ -357,8 +357,8 @@ export function SettingsView() {
               return (
                 <div
                   key={entity.entity_id}
-                  className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                    isOn ? 'bg-emerald-500/20' : 'bg-slate-700/50'
+                  className={`flex items-center justify-between glass-panel rounded-lg px-3 py-2 ${
+                    isOn ? 'bg-emerald-500/20' : ''
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -388,15 +388,15 @@ export function SettingsView() {
 
         {/* Automation picker */}
         {showAutomationPicker && (
-          <div className="border-t border-slate-700 pt-3 mt-3">
+          <div className="border-t border-white/5 pt-3 mt-3">
             <input
               type="text"
               value={automationFilter}
               onChange={(e) => setAutomationFilter(e.target.value)}
               placeholder="Search automations..."
-              className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 mb-3 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              className="w-full glass-panel text-white rounded-lg px-3 py-2 mb-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm"
             />
-            <div className="max-h-64 overflow-y-auto space-y-1">
+            <div className="max-h-64 overflow-y-auto space-y-1 scrollbar-hide">
               {filteredAutomations.map(entity => {
                 const name = getDisplayName(entity.entity_id, entity.attributes.friendly_name || entity.entity_id.split('.')[1])
                 const isPinned = (settings.pinnedAutomations || []).includes(entity.entity_id)
@@ -406,7 +406,7 @@ export function SettingsView() {
                     key={entity.entity_id}
                     onClick={() => togglePinnedAutomation(entity.entity_id)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
-                      isPinned ? 'bg-emerald-600/20 text-emerald-400' : 'bg-slate-700/30 text-slate-300 hover:bg-slate-700'
+                      isPinned ? 'glass-panel bg-emerald-600/20 text-emerald-400' : 'glass-panel text-slate-300 hover:bg-white/5'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -435,7 +435,7 @@ export function SettingsView() {
       </section>
 
       {/* Hidden Entities Management */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h3 className="text-sm font-medium text-slate-400">Hidden Entities</h3>
@@ -445,7 +445,7 @@ export function SettingsView() {
           </div>
           <button
             onClick={() => setShowHiddenManager(!showHiddenManager)}
-            className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-white transition-colors"
+            className="glass-button px-3 py-1.5 hover:bg-white/5 rounded-lg text-sm text-white transition-colors"
           >
             {showHiddenManager ? 'Done' : 'Manage'}
           </button>
@@ -496,16 +496,16 @@ export function SettingsView() {
             )}
 
             {/* Add entities to hide */}
-            <div className="border-t border-slate-700 pt-3">
+            <div className="border-t border-white/5 pt-3">
               <p className="text-xs text-slate-400 mb-2">Hide an entity:</p>
               <input
                 type="text"
                 value={hiddenFilter}
                 onChange={(e) => setHiddenFilter(e.target.value)}
                 placeholder="Search entities to hide..."
-                className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 mb-3 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full glass-panel text-white rounded-lg px-3 py-2 mb-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
               />
-              <div className="max-h-48 overflow-y-auto space-y-1">
+              <div className="max-h-48 overflow-y-auto space-y-1 scrollbar-hide">
                 {filteredHideableEntities.slice(0, 50).map(entity => {
                   const name = getDisplayName(entity.entity_id, entity.attributes.friendly_name || entity.entity_id.split('.')[1])
                   const isHidden = hiddenEntities.has(entity.entity_id)
@@ -515,8 +515,8 @@ export function SettingsView() {
                       onClick={() => isHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
                         isHidden
-                          ? 'bg-red-500/20 text-red-400'
-                          : 'bg-slate-700/30 text-slate-300 hover:bg-slate-700'
+                          ? 'glass-panel bg-red-500/20 text-red-400'
+                          : 'glass-panel text-slate-300 hover:bg-white/5'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -551,14 +551,14 @@ export function SettingsView() {
       </section>
 
       {/* Calendar Filter */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <h3 className="text-sm font-medium text-slate-400 mb-3">Calendar Filter</h3>
         <input
           type="text"
           value={settings.calendarPattern}
           onChange={(e) => handleCalendarPatternChange(e.target.value)}
           placeholder="e.g., erikson, family"
-          className="w-full bg-slate-700 text-white rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         />
         <p className="text-xs text-slate-500 mt-2">
           Only show calendars matching this pattern. Supports regex (e.g., "erik|family").
@@ -585,14 +585,14 @@ export function SettingsView() {
       </section>
 
       {/* People Filter */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <h3 className="text-sm font-medium text-slate-400 mb-3">People Filter</h3>
         <input
           type="text"
           value={settings.peoplePattern}
           onChange={(e) => handlePeoplePatternChange(e.target.value)}
           placeholder="e.g., shelby|wayne"
-          className="w-full bg-slate-700 text-white rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         />
         <p className="text-xs text-slate-500 mt-2">
           Only show people matching this pattern on the Home screen. Use "|" for multiple names.
@@ -600,25 +600,25 @@ export function SettingsView() {
       </section>
 
       {/* AI Insights */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-white">AI Insights</h3>
+            <h3 className="text-sm font-medium text-white text-shadow">AI Insights</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               {isClaudeConfigured() ? 'Claude API connected' : 'API key not configured'}
             </p>
           </div>
           <button
             onClick={handleAIToggle}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              settings.aiInsightsEnabled ? 'bg-blue-500' : 'bg-slate-600'
+            className={`toggle-3d relative w-12 h-7 rounded-full transition-all ${
+              settings.aiInsightsEnabled ? 'bg-gradient-to-r from-blue-500 to-cyan-400' : 'bg-slate-600'
             }`}
             role="switch"
             aria-checked={settings.aiInsightsEnabled}
           >
             <div
-              className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
-                settings.aiInsightsEnabled ? 'translate-x-5' : 'translate-x-0.5'
+              className={`toggle-3d-knob absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform ${
+                settings.aiInsightsEnabled ? 'translate-x-6' : 'translate-x-1'
               }`}
             />
           </button>
@@ -631,12 +631,12 @@ export function SettingsView() {
       </section>
 
       {/* Refresh Interval */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <h3 className="text-sm font-medium text-slate-400 mb-3">Auto-Refresh Interval</h3>
         <select
           value={settings.refreshInterval}
           onChange={(e) => handleRefreshIntervalChange(Number(e.target.value))}
-          className="w-full bg-slate-700 text-white rounded-lg px-3 py-2.5 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         >
           <option value={10}>10 seconds</option>
           <option value={30}>30 seconds</option>
@@ -650,7 +650,7 @@ export function SettingsView() {
       </section>
 
       {/* Hidden Rooms */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-sm font-medium text-slate-400">Hidden Rooms</h3>
@@ -661,7 +661,7 @@ export function SettingsView() {
           {hiddenRooms.size > 0 && (
             <button
               onClick={showAllRooms}
-              className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-white transition-colors"
+              className="glass-button px-3 py-1.5 hover:bg-white/5 rounded-lg text-sm text-white transition-colors"
             >
               Show All
             </button>
@@ -670,7 +670,7 @@ export function SettingsView() {
       </section>
 
       {/* Advanced / Debug Info */}
-      <section className="bg-slate-800 rounded-xl p-4">
+      <section className="glass-card p-4">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center justify-between w-full text-left"

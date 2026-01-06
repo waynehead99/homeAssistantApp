@@ -104,11 +104,13 @@ export function CalendarView() {
   if (filteredCalendars.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-        <svg className="w-16 h-16 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-        </svg>
-        <p>No matching calendars found</p>
-        <p className="text-xs mt-1">Update the calendar filter in Settings</p>
+        <div className="glass-card p-8 text-center">
+          <svg className="w-16 h-16 mb-4 mx-auto opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+          </svg>
+          <p className="text-shadow">No matching calendars found</p>
+          <p className="text-xs mt-1">Update the calendar filter in Settings</p>
+        </div>
       </div>
     )
   }
@@ -117,11 +119,11 @@ export function CalendarView() {
     <div className="space-y-4 pb-20">
       {/* Header with day selector */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-medium text-white">Upcoming Events</h2>
+        <h2 className="text-lg font-medium text-white text-shadow">Upcoming Events</h2>
         <select
           value={daysToShow}
           onChange={(e) => setDaysToShow(Number(e.target.value))}
-          className="bg-slate-800 text-white text-sm rounded-lg px-3 py-1.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="glass-panel text-white text-sm rounded-lg px-3 py-1.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         >
           <option value={1}>Today</option>
           <option value={3}>3 days</option>
@@ -132,11 +134,11 @@ export function CalendarView() {
       </div>
 
       {events.length === 0 ? (
-        <div className="bg-slate-800 rounded-xl p-6 text-center">
-          <svg className="w-12 h-12 mx-auto mb-3 text-slate-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+        <div className="glass-card p-6 text-center">
+          <svg className="w-12 h-12 mx-auto mb-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z" />
           </svg>
-          <p className="text-slate-400">No events scheduled</p>
+          <p className="text-slate-400 text-shadow">No events scheduled</p>
         </div>
       ) : (
         Object.entries(eventsByDate).map(([date, dateEvents]) => (
@@ -158,12 +160,12 @@ export function CalendarView() {
               {dateEvents.map((event, idx) => (
                 <div
                   key={`${event.summary}-${idx}`}
-                  className="bg-slate-800 rounded-xl p-4"
+                  className="glass-card p-4"
                 >
                   <div className="flex items-start gap-3">
                     {/* Time indicator */}
                     <div className="flex-shrink-0 w-16 text-right">
-                      <p className="text-sm font-medium text-blue-400">
+                      <p className="text-sm font-medium text-blue-400 text-shadow">
                         {formatTime(event)}
                       </p>
                       {event.start.dateTime && event.end.dateTime && (
@@ -174,11 +176,11 @@ export function CalendarView() {
                     </div>
 
                     {/* Divider */}
-                    <div className="w-px h-12 bg-slate-700 flex-shrink-0"></div>
+                    <div className="w-px h-12 bg-white/10 flex-shrink-0"></div>
 
                     {/* Event details */}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-white truncate">
+                      <h4 className="font-medium text-white truncate text-shadow">
                         {event.summary}
                       </h4>
                       {event.location && (

@@ -147,7 +147,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
   return (
     <div className={`space-y-6 ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
       {/* Power Toggle */}
-      <div className="bg-slate-700/50 rounded-xl p-4">
+      <div className="glass-panel p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Fan Icon */}
@@ -183,7 +183,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
 
       {/* Speed Slider */}
       {supportsSpeed && isOn && (
-        <div className="bg-slate-700/50 rounded-xl p-4">
+        <div className="glass-panel p-4">
           <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Speed</div>
           <div className="flex items-center gap-4">
             <span className="text-slate-500 text-sm w-8">0%</span>
@@ -196,7 +196,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
               onChange={(e) => handleSpeedChange(Number(e.target.value))}
               onMouseUp={handleSpeedCommit}
               onTouchEnd={handleSpeedCommit}
-              className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              className="slider-3d flex-1"
             />
             <span className="text-slate-500 text-sm w-12 text-right">100%</span>
           </div>
@@ -215,10 +215,10 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
                 <button
                   key={mode}
                   onClick={() => handlePresetMode(mode)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all ${
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-300 ${
                     isActive
-                      ? 'bg-blue-400/20 text-blue-400 ring-1 ring-blue-400/30'
-                      : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
+                      ? 'bg-blue-400/20 text-blue-400 ring-1 ring-blue-400/30 glow-blue'
+                      : 'glass-panel text-slate-400 hover:bg-white/5'
                   }`}
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -241,10 +241,10 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
           {supportsOscillate && (
             <button
               onClick={handleOscillate}
-              className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all duration-300 ${
                 oscillating
-                  ? 'bg-green-400/20 text-green-400 ring-1 ring-green-400/30'
-                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
+                  ? 'bg-green-400/20 text-green-400 ring-1 ring-green-400/30 glow-green'
+                  : 'glass-panel text-slate-400 hover:bg-white/5'
               }`}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -258,10 +258,10 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
           {supportsDirection && (
             <button
               onClick={handleDirection}
-              className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all ${
+              className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all duration-300 ${
                 direction === 'reverse'
-                  ? 'bg-purple-400/20 text-purple-400 ring-1 ring-purple-400/30'
-                  : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
+                  ? 'bg-purple-400/20 text-purple-400 ring-1 ring-purple-400/30 glow-purple'
+                  : 'glass-panel text-slate-400 hover:bg-white/5'
               }`}
             >
               <svg

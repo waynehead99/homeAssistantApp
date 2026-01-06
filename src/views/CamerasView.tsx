@@ -58,15 +58,15 @@ function CameraSnapshot({
 
   if (loading && !imageUrl) {
     return (
-      <div className={`bg-slate-700 flex items-center justify-center ${className}`}>
-        <div className="animate-pulse w-8 h-8 bg-slate-600 rounded-full" />
+      <div className={`bg-slate-800/50 flex items-center justify-center ${className}`}>
+        <div className="animate-pulse w-8 h-8 bg-slate-700 rounded-full" />
       </div>
     )
   }
 
   if (error || !imageUrl) {
     return (
-      <div className={`bg-slate-700 flex items-center justify-center ${className}`}>
+      <div className={`bg-slate-800/50 flex items-center justify-center ${className}`}>
         <svg className="w-8 h-8 text-slate-500" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 9a3.75 3.75 0 100 7.5A3.75 3.75 0 0012 9z"/>
           <path fillRule="evenodd" d="M9.344 3.071a49.52 49.52 0 015.312 0c.967.052 1.83.585 2.332 1.39l.821 1.317c.24.383.645.643 1.11.71.386.054.77.113 1.152.177 1.432.245 2.429 1.493 2.429 2.909V18a3 3 0 01-3 3h-15a3 3 0 01-3-3V9.574c0-1.416.997-2.664 2.429-2.909.382-.064.766-.123 1.152-.177a1.56 1.56 0 001.11-.71l.822-1.315a2.942 2.942 0 012.332-1.39zM6.75 12.75a5.25 5.25 0 1110.5 0 5.25 5.25 0 01-10.5 0zm12-1.5a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd"/>
@@ -148,12 +148,14 @@ export function CamerasView() {
   if (cameras.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-        <svg className="w-16 h-16 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-        </svg>
-        <p>No cameras found</p>
-        <p className="text-sm text-slate-500 mt-1">Add camera integrations in Home Assistant</p>
+        <div className="glass-card p-8 text-center">
+          <svg className="w-16 h-16 mb-4 mx-auto opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+          </svg>
+          <p className="text-shadow">No cameras found</p>
+          <p className="text-sm text-slate-500 mt-1">Add camera integrations in Home Assistant</p>
+        </div>
       </div>
     )
   }
@@ -169,13 +171,13 @@ export function CamerasView() {
     const isFrigate = frigateCameraMap.get(selectedCamera) || false
 
     return (
-      <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      <div className="fixed inset-0 bg-black/95 z-50 flex flex-col backdrop-blur-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-black/80 z-10">
-          <h2 className="text-lg font-medium text-white capitalize">{name}</h2>
+        <div className="flex items-center justify-between p-4 glass-card rounded-none border-t-0 border-x-0 z-10">
+          <h2 className="text-lg font-medium text-white capitalize text-shadow">{name}</h2>
           <button
             onClick={() => setSelectedCamera(null)}
-            className="p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="glass-button p-2 text-white hover:bg-white/10 rounded-lg transition-colors"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -211,10 +213,10 @@ export function CamerasView() {
             <button
               key={camera.entity_id}
               onClick={() => setSelectedCamera(camera.entity_id)}
-              className="bg-slate-800 rounded-xl overflow-hidden text-left hover:ring-2 hover:ring-blue-500 transition-all"
+              className="glass-card overflow-hidden text-left hover:ring-2 hover:ring-blue-500/50 hover:glow-blue transition-all duration-300"
             >
               {/* Snapshot */}
-              <div className="aspect-video bg-slate-900 relative">
+              <div className="aspect-video bg-slate-900/50 relative">
                 <CameraSnapshot
                   camera={camera}
                   className="w-full h-full object-cover"
@@ -223,7 +225,7 @@ export function CamerasView() {
                 />
                 {/* Event badge */}
                 {cameraEvents.length > 0 && (
-                  <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-medium px-1.5 py-0.5 rounded">
+                  <div className="absolute top-2 right-2 bg-blue-500/90 backdrop-blur-sm text-white text-xs font-medium px-1.5 py-0.5 rounded-lg shadow-lg">
                     {cameraEvents.length}
                   </div>
                 )}
@@ -231,7 +233,7 @@ export function CamerasView() {
 
               {/* Info */}
               <div className="p-2">
-                <p className="font-medium text-white text-sm capitalize truncate">{name}</p>
+                <p className="font-medium text-white text-sm capitalize truncate text-shadow">{name}</p>
                 {cameraEvents.length > 0 && (
                   <p className="text-xs text-slate-400 mt-0.5">
                     {cameraEvents[0].label} · {formatEventTime(cameraEvents[0].start_time)}
@@ -257,10 +259,10 @@ export function CamerasView() {
               return (
                 <div
                   key={event.id}
-                  className="bg-slate-800 rounded-xl p-3 flex items-center gap-3"
+                  className="glass-card p-3 flex items-center gap-3"
                 >
                   {/* Thumbnail */}
-                  <div className="w-16 h-12 bg-slate-700 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="w-16 h-12 glass-panel rounded-lg overflow-hidden flex-shrink-0">
                     <img
                       src={thumbnailUrl}
                       alt={`${event.label} detection`}
@@ -275,7 +277,7 @@ export function CamerasView() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white text-sm capitalize">
+                    <p className="font-medium text-white text-sm capitalize text-shadow">
                       {event.label} detected
                     </p>
                     <p className="text-xs text-slate-400 capitalize">

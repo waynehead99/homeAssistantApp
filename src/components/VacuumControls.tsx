@@ -89,12 +89,16 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
       {/* Status Display */}
       <div className="text-center">
         {/* Vacuum Icon */}
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700 mb-3">
+        <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 transition-all duration-300 ${
+          isCleaning
+            ? 'bg-gradient-to-br from-green-400/30 to-emerald-500/20 glow-green'
+            : 'glass-panel'
+        }`}>
           <svg className={`w-10 h-10 ${stateInfo.color} ${isCleaning ? 'animate-pulse' : ''}`} viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z" />
           </svg>
         </div>
-        <div className={`text-xl font-medium ${stateInfo.color}`}>
+        <div className={`text-xl font-medium ${stateInfo.color} text-shadow`}>
           {stateInfo.label}
         </div>
         {status && status !== currentState && (
@@ -104,14 +108,14 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
 
       {/* Battery */}
       {battery !== undefined && (
-        <div className="bg-slate-700/50 rounded-xl p-4">
+        <div className="glass-panel p-4">
           <div className="flex items-center justify-between">
             <span className="text-sm text-slate-400">Battery</span>
             <div className="flex items-center gap-2">
-              <div className="w-24 h-2 bg-slate-600 rounded-full overflow-hidden">
+              <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden shadow-inner">
                 <div
-                  className={`h-full rounded-full ${
-                    battery <= 20 ? 'bg-red-400' : battery <= 50 ? 'bg-yellow-400' : 'bg-green-400'
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    battery <= 20 ? 'bg-gradient-to-r from-red-500 to-red-400' : battery <= 50 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-green-500 to-emerald-400'
                   }`}
                   style={{ width: `${battery}%` }}
                 />
@@ -130,7 +134,7 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
         {!isCleaning && (
           <button
             onClick={() => handleCommand('start')}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-green-400/10 hover:bg-green-400/20 text-green-400 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-green-400/10 hover:bg-green-400/20 text-green-400 transition-all duration-300 active:scale-95"
           >
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
               <path d="M8 5v14l11-7z" />
@@ -143,7 +147,7 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
         {isCleaning && (
           <button
             onClick={() => handleCommand('pause')}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-400 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-yellow-400/10 hover:bg-yellow-400/20 text-yellow-400 transition-all duration-300 active:scale-95"
           >
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
@@ -155,7 +159,7 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
         {/* Stop Button */}
         <button
           onClick={() => handleCommand('stop')}
-          className="flex flex-col items-center gap-2 p-4 rounded-xl bg-red-400/10 hover:bg-red-400/20 text-red-400 transition-colors"
+          className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-red-400/10 hover:bg-red-400/20 text-red-400 transition-all duration-300 active:scale-95"
         >
           <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h12v12H6z" />
@@ -167,7 +171,7 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
         {!isDocked && (
           <button
             onClick={() => handleCommand('return_to_base')}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl bg-blue-400/10 hover:bg-blue-400/20 text-blue-400 transition-colors"
+            className="flex flex-col items-center gap-2 p-4 rounded-xl glass-panel bg-blue-400/10 hover:bg-blue-400/20 text-blue-400 transition-all duration-300 active:scale-95"
           >
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -186,10 +190,10 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
               <button
                 key={speed}
                 onClick={() => handleFanSpeed(speed)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   fanSpeed === speed
-                    ? 'bg-purple-400/20 text-purple-400 ring-1 ring-purple-400/50'
-                    : 'bg-slate-700/50 text-slate-300 hover:bg-slate-700'
+                    ? 'bg-purple-400/20 text-purple-400 ring-1 ring-purple-400/50 glow-purple'
+                    : 'glass-panel text-slate-300 hover:bg-white/5'
                 }`}
               >
                 {speed.charAt(0).toUpperCase() + speed.slice(1)}

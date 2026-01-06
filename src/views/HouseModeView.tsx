@@ -116,8 +116,8 @@ export function HouseModeView() {
   if (!houseModeEntity) {
     return (
       <div className="p-4 pb-24">
-        <div className="bg-slate-800 rounded-2xl p-6 text-center">
-          <p className="text-slate-400">House mode entity not found</p>
+        <div className="glass-card p-6 text-center">
+          <p className="text-slate-400 text-shadow">House mode entity not found</p>
           <p className="text-sm text-slate-500 mt-2">Looking for: input_text.house_mode2</p>
         </div>
       </div>
@@ -127,20 +127,20 @@ export function HouseModeView() {
   return (
     <div className="p-4 pb-24 space-y-6">
       {/* Current Mode Display */}
-      <div className={`rounded-2xl p-6 border ${
+      <div className={`glass-card p-6 transition-all ${
         currentModeConfig
-          ? `${colorClasses[currentModeConfig.color].bg} ${colorClasses[currentModeConfig.color].border}`
-          : 'bg-slate-800 border-slate-700'
-      }`}>
+          ? `${colorClasses[currentModeConfig.color].bg}`
+          : ''
+      }`} style={currentModeConfig ? { boxShadow: `0 0 30px ${colorClasses[currentModeConfig.color].text.replace('text-', 'rgba(').replace('-400', ', 0.3)')}` } : {}}>
         <div className="text-sm text-slate-400 mb-2">Current Mode</div>
         <div className="flex items-center gap-4">
           {currentModeConfig && (
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${colorClasses[currentModeConfig.color].activeBg}`}>
-              <ModeIcon icon={currentModeConfig.icon} className="w-8 h-8 text-white" />
+            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${colorClasses[currentModeConfig.color].activeBg} shadow-lg`}>
+              <ModeIcon icon={currentModeConfig.icon} className="w-8 h-8 text-white drop-shadow-lg" />
             </div>
           )}
           <div>
-            <h2 className={`text-3xl font-semibold ${
+            <h2 className={`text-3xl font-semibold text-shadow ${
               currentModeConfig ? colorClasses[currentModeConfig.color].text : 'text-white'
             }`}>
               {currentMode}
@@ -163,20 +163,21 @@ export function HouseModeView() {
                 key={mode.id}
                 onClick={() => handleModeChange(mode.id)}
                 disabled={loading || isActive}
-                className={`flex flex-col items-center gap-3 p-5 rounded-2xl transition-all ${
+                className={`glass-card flex flex-col items-center gap-3 p-5 transition-all duration-300 ${
                   isActive
                     ? `${colors.activeBg} text-white shadow-lg`
-                    : `bg-slate-800 hover:bg-slate-700 ${colors.text}`
+                    : `hover:bg-white/5 ${colors.text}`
                 } ${loading ? 'opacity-50 pointer-events-none' : ''} ${
                   isActive ? '' : 'active:scale-95'
                 }`}
+                style={isActive ? { boxShadow: `0 0 25px ${colors.text.replace('text-', 'rgba(').replace('-400', ', 0.4)')}` } : {}}
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                  isActive ? 'bg-white/20' : colors.bg
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                  isActive ? 'bg-white/20 shadow-inner' : `glass-panel ${colors.bg}`
                 }`}>
-                  <ModeIcon icon={mode.icon} className="w-6 h-6" />
+                  <ModeIcon icon={mode.icon} className={`w-6 h-6 ${isActive ? 'drop-shadow-lg' : ''}`} />
                 </div>
-                <span className="text-sm font-medium">{mode.label}</span>
+                <span className={`text-sm font-medium ${isActive ? 'text-shadow' : ''}`}>{mode.label}</span>
                 {isActive && (
                   <span className="text-xs opacity-75">Active</span>
                 )}

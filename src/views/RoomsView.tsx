@@ -43,35 +43,35 @@ function EditNameModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-      <div className="bg-slate-800 rounded-2xl p-6 w-full max-w-sm">
-        <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="glass-card p-6 w-full max-w-sm shadow-glass-lg">
+        <h3 className="text-lg font-semibold text-white mb-4 text-shadow">{title}</h3>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full glass-panel border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
           placeholder="Enter custom name"
           autoFocus
         />
         <div className="flex gap-3 mt-6">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-colors"
+            className="flex-1 py-3 glass-button text-white font-medium rounded-xl transition-all"
           >
             Cancel
           </button>
           {onReset && (
             <button
               onClick={onReset}
-              className="py-3 px-4 bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium rounded-xl transition-colors"
+              className="py-3 px-4 glass-button text-slate-300 font-medium rounded-xl transition-all"
             >
               Reset
             </button>
           )}
           <button
             onClick={() => onSave(name)}
-            className="flex-1 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition-colors"
+            className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-cyan-400 hover:from-blue-400 hover:to-cyan-300 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-500/30"
           >
             Save
           </button>
@@ -206,13 +206,13 @@ export function RoomsView() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white">Rooms</h2>
+        <h2 className="text-lg font-semibold text-white text-shadow">Rooms</h2>
         <button
           onClick={() => setEditMode(!editMode)}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 ${
             editMode
-              ? 'bg-blue-500 text-white'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30'
+              : 'glass-button text-slate-300'
           }`}
         >
           {editMode ? 'Done' : 'Edit'}
@@ -221,7 +221,7 @@ export function RoomsView() {
 
       {/* Edit mode hint */}
       {editMode && (
-        <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-3 mb-4">
+        <div className="glass-card bg-blue-500/10 p-3 mb-4 glow-blue">
           <p className="text-sm text-blue-300">
             Tap names to edit • Tap hide icons to hide rooms/devices
           </p>
@@ -243,17 +243,17 @@ export function RoomsView() {
         return (
           <div
             key={areaName}
-            className={`bg-slate-800/50 rounded-xl overflow-hidden ${isHidden ? 'opacity-50' : ''}`}
+            className={`glass-card overflow-hidden transition-all duration-300 ${isHidden ? 'opacity-50' : ''}`}
           >
             {/* Room Header - always visible */}
             <div className="flex items-center">
               <button
                 onClick={() => toggleRoom(areaName)}
-                className="flex-1 p-4 flex items-center justify-between hover:bg-slate-800/80 transition-colors"
+                className="flex-1 p-4 flex items-center justify-between hover:bg-white/5 transition-all duration-300"
               >
                 <div className="flex items-center gap-3">
                   {/* Room icon */}
-                  <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 glass-panel rounded-xl flex items-center justify-center">
                     <svg className="w-5 h-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                     </svg>
@@ -340,7 +340,7 @@ export function RoomsView() {
 
             {/* Expanded Content */}
             {isExpanded && hasDevices && (
-              <div className="px-4 pb-4 space-y-3 border-t border-slate-700/50">
+              <div className="px-4 pb-4 space-y-3 border-t border-white/5">
                 {/* Room controls */}
                 {lights.length > 0 && (
                   <div className="flex items-center justify-end gap-2 pt-3">
