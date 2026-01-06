@@ -210,7 +210,42 @@ docker build \
 docker run -d -p 3000:80 --name ha-dashboard --restart unless-stopped ha-dashboard
 ```
 
-### Option 4: Home Assistant Add-on / Ingress
+### Option 4: Portainer (from GitHub)
+
+Deploy directly from GitHub using Portainer's Git integration:
+
+1. **Push to GitHub** (if not already):
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/ha-dashboard.git
+   git push -u origin main
+   ```
+
+2. **In Portainer**, go to **Stacks** → **Add stack**
+
+3. Select **Repository** as the build method
+
+4. Fill in the Git settings:
+   - **Repository URL**: `https://github.com/YOUR_USERNAME/ha-dashboard`
+   - **Repository reference**: `refs/heads/main`
+   - **Compose path**: `docker-compose.yml`
+
+5. Scroll down to **Environment variables** and add:
+   | Name | Value |
+   |------|-------|
+   | `VITE_HA_URL` | `http://your-homeassistant:8123` |
+   | `VITE_HA_TOKEN` | `your_long_lived_access_token` |
+   | `VITE_FRIGATE_URL` | `http://your-frigate:5000` (optional) |
+   | `VITE_CLAUDE_API_KEY` | `sk-ant-xxxxx` (optional) |
+   | `DASHBOARD_PORT` | `3000` (optional, change if needed) |
+
+6. Click **Deploy the stack**
+
+7. Access the dashboard at `http://your-server:3000`
+
+**To update after code changes:**
+- In Portainer, go to the stack → click **Pull and redeploy**
+
+### Option 5: Home Assistant Add-on / Ingress
 
 You can serve this as a panel in Home Assistant:
 

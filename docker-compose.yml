@@ -12,8 +12,10 @@ services:
     image: ha-dashboard:latest
     container_name: ha-dashboard
     ports:
-      - "3000:80"
+      - "${DASHBOARD_PORT:-3000}:80"
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
       interval: 30s
