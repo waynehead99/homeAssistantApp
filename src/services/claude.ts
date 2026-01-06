@@ -36,9 +36,9 @@ Date: ${context.date}
 
 `
 
-  // Weather info
+  // Weather info - explicitly label as TODAY's weather
   if (context.weather) {
-    prompt += `Weather: ${context.weather.temp}°F, ${context.weather.condition}`
+    prompt += `TODAY'S Weather (not tomorrow): ${context.weather.temp}°F, ${context.weather.condition}`
     if (context.weather.humidity) {
       prompt += `, ${context.weather.humidity}% humidity`
     }
@@ -50,7 +50,7 @@ Date: ${context.date}
         const time = new Date(f.datetime).toLocaleTimeString('en-US', { hour: 'numeric' })
         return `${time}: ${f.temp}°F ${f.condition}`
       }).join(', ')
-      prompt += `Forecast: ${forecastStr}\n`
+      prompt += `Today's Forecast (next few hours): ${forecastStr}\n`
     }
   }
 
@@ -150,16 +150,21 @@ Date: ${context.date}
 
   prompt += `
 Provide ONE helpful insight, prioritizing in this order:
-1. Weather + calendar synergy (e.g., "Perfect day for your outdoor plans!" or "Rain expected - good thing your meeting is indoors")
+1. TODAY's weather + TODAY's events only (e.g., "Perfect weather for your outdoor plans today!")
 2. Practical reminders (e.g., doors left open that might need closing, energy savings if everyone's away)
 3. Time-appropriate suggestions (morning routines, evening wind-down)
 
-Important guidelines:
+CRITICAL DATE RULES - READ CAREFULLY:
+- The weather data shown above is for TODAY ONLY
+- NEVER apply today's weather to tomorrow's events (you don't know tomorrow's weather!)
+- Events labeled "tomorrow" should only get simple mentions like "Don't forget your meeting tomorrow" - do NOT mention weather for tomorrow's events
+- Events labeled "today" can be paired with today's weather
+- If there are no events TODAY, focus on weather observations or home status instead
+
+Other guidelines:
 - This is a normal family home, NOT a security facility
-- Open doors during daytime are normal - only mention if unusual (like leaving for work with garage open)
+- Open doors during daytime are normal - only mention if unusual
 - Be positive and helpful, not alarming
-- IMPORTANT: Pay attention to event dates! Events labeled "tomorrow" are NOT happening today. Only mention today's events as current/upcoming. Tomorrow's events can be mentioned as "coming up tomorrow" but don't treat them as happening now.
-- If nothing notable, share a friendly weather observation or day-appropriate tip
 
 Respond with only 1-2 friendly sentences. No greetings, sign-offs, or security warnings.`
 
