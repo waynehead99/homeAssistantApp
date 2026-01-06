@@ -210,40 +210,69 @@ docker build \
 docker run -d -p 3000:80 --name ha-dashboard --restart unless-stopped ha-dashboard
 ```
 
-### Option 4: Portainer (from GitHub)
+### Option 4: Portainer (from GitHub) - Recommended
 
-Deploy directly from GitHub using Portainer's Git integration:
+This method uses GitHub Actions to automatically build the Docker image, then Portainer pulls the pre-built image.
 
-1. **Push to GitHub** (if not already):
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/ha-dashboard.git
-   git push -u origin main
-   ```
+#### Step 1: Push to GitHub
 
-2. **In Portainer**, go to **Stacks** → **Add stack**
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/ha-dashboard.git
+git push -u origin main
+```
 
-3. Select **Repository** as the build method
+#### Step 2: Configure GitHub Repository
 
-4. Fill in the Git settings:
-   - **Repository URL**: `https://github.com/YOUR_USERNAME/ha-dashboard`
-   - **Repository reference**: `refs/heads/main`
-   - **Compose path**: `docker-compose.yml`
+1. Go to your repo on GitHub → **Settings** → **Secrets and variables** → **Actions**
 
-5. Scroll down to **Environment variables** and add:
+2. Add these **Secrets** (for sensitive data):
+   | Name | Value |
+   |------|-------|
+   | `VITE_HA_TOKEN` | `your_long_lived_access_token` |
+   | `VITE_CLAUDE_API_KEY` | `sk-ant-xxxxx` (optional) |
+
+3. Add these **Variables** (for non-sensitive data):
    | Name | Value |
    |------|-------|
    | `VITE_HA_URL` | `http://your-homeassistant:8123` |
-   | `VITE_HA_TOKEN` | `your_long_lived_access_token` |
    | `VITE_FRIGATE_URL` | `http://your-frigate:5000` (optional) |
-   | `VITE_CLAUDE_API_KEY` | `sk-ant-xxxxx` (optional) |
-   | `DASHBOARD_PORT` | `3000` (optional, change if needed) |
 
-6. Click **Deploy the stack**
+4. Go to **Actions** tab and manually run the workflow, or just push a commit
 
-7. Access the dashboard at `http://your-server:3000`
+5. Go to **Settings** → **Actions** → **General** → scroll to **Workflow permissions** → select **Read and write permissions** → Save
 
-**To update after code changes:**
-- In Portainer, go to the stack → click **Pull and redeploy**
+6. Go to **Packages** (on your profile) and make the package public, or configure Portainer with a GitHub token
+
+#### Step 3: Deploy in Portainer
+
+1. Go to **Stacks** → **Add stack**
+
+2. Select **Repository**
+
+3. Configure:
+   | Setting | Value |
+   |---------|-------|
+   | Repository URL | `https://github.com/YOUR_USERNAME/ha-dashboard` |
+   | Repository reference | `refs/heads/main` |
+   | **Compose path** | `docker-compose.portainer.yml` |
+
+4. Add **Environment variables**:
+   | Name | Value |
+   |------|-------|
+   | `GITHUB_REPO` | `your-username/ha-dashboard` (lowercase!) |
+   | `DASHBOARD_PORT` | `3000` (optional) |
+
+5. Click **Deploy the stack**
+
+6. Access at `http://your-server:3000`
+
+#### Updating
+
+When you push changes to GitHub:
+1. GitHub Actions automatically builds a new image
+2. In Portainer: Go to stack → **Pull and redeploy**
+
+Or enable Watchtower to auto-update when new images are available.
 
 ### Option 5: Home Assistant Add-on / Ingress
 

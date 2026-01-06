@@ -1,0 +1,18 @@
+# Use this file for Portainer deployment
+# The image is automatically built by GitHub Actions
+version: '3.8'
+
+services:
+  ha-dashboard:
+    image: ghcr.io/${GITHUB_REPO:-your-username/ha-dashboard}:latest
+    container_name: ha-dashboard
+    ports:
+      - "${DASHBOARD_PORT:-3000}:80"
+    restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
