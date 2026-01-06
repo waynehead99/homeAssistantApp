@@ -361,8 +361,8 @@ export function HomeView() {
                     {renderIcon()}
                   </div>
                   <div className="flex-1 text-left min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{name}</p>
-                    <p className={`text-xs ${isActive ? colors.text : 'text-slate-500'}`}>
+                    <p className="text-sm font-medium text-white line-clamp-2 leading-tight">{name}</p>
+                    <p className={`text-xs mt-0.5 ${isActive ? colors.text : 'text-slate-500'}`}>
                       {statusText}
                     </p>
                   </div>

@@ -140,18 +140,22 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
           {/* Bottom row: People, Locks, Alarm */}
           <div className="flex items-center justify-between mt-1.5 gap-2">
             {/* People status */}
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="flex items-center gap-4 flex-1 min-w-0 overflow-x-auto">
               {filteredPeople.map(person => {
                 const name = (person.attributes.friendly_name || person.entity_id.split('.')[1]).split(' ')[0]
                 const isHome = person.state === 'home'
                 const location = formatLocation(person.state)
                 return (
-                  <div key={person.entity_id} className="flex items-center gap-1.5 min-w-0">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isHome ? 'bg-green-400' : 'bg-slate-600'}`} />
-                    <span className={`text-xs truncate ${isHome ? 'text-slate-300' : 'text-slate-500'}`}>
-                      {name}
-                      <span className="text-slate-500 ml-1">· {location}</span>
-                    </span>
+                  <div key={person.entity_id} className="flex items-center gap-2 flex-shrink-0">
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isHome ? 'bg-green-400 shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-slate-600'}`} />
+                    <div className="flex flex-col">
+                      <span className={`text-xs font-medium ${isHome ? 'text-slate-200' : 'text-slate-500'}`}>
+                        {name}
+                      </span>
+                      <span className={`text-[10px] ${isHome ? 'text-green-400' : 'text-slate-500'}`}>
+                        {location}
+                      </span>
+                    </div>
                   </div>
                 )
               })}

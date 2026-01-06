@@ -53,15 +53,15 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
             {onEditName ? (
               <button
                 onClick={onEditName}
-                className="font-medium text-white truncate text-sm hover:text-blue-400 transition-colors flex items-center gap-1"
+                className="font-medium text-white text-sm hover:text-blue-400 transition-colors flex items-start gap-1 text-left"
               >
-                {friendlyName}
-                <svg className="w-3 h-3 text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <span className="line-clamp-2 leading-tight">{friendlyName}</span>
+                <svg className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                 </svg>
               </button>
             ) : (
-              <h3 className="font-medium text-white truncate text-sm">{friendlyName}</h3>
+              <h3 className="font-medium text-white text-sm line-clamp-2 leading-tight">{friendlyName}</h3>
             )}
             <p className="text-xs text-slate-400">{isOn ? 'On' : 'Off'}</p>
           </div>

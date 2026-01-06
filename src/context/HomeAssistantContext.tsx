@@ -580,7 +580,6 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
           customNames: hasHACustomNames ? synced.customNames! : loadCustomNames(),
           syncEnabled: true,
         })
-        console.log('Settings loaded from Home Assistant')
       } else {
         // Fall back to localStorage
         dispatch({
@@ -591,7 +590,6 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
           customNames: loadCustomNames(),
           syncEnabled: false,
         })
-        console.log('Settings loaded from localStorage (HA sync unavailable)')
       }
     }
 

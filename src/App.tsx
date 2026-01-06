@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { HomeAssistantProvider, useHomeAssistantContext } from './context/HomeAssistantContext'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { SetupScreen } from './components/SetupScreen'
 import { Layout } from './components/Layout'
 import { TabBar, type TabId } from './components/TabBar'
@@ -77,8 +78,10 @@ function AppContent() {
 
 export default function App() {
   return (
-    <HomeAssistantProvider>
-      <AppContent />
-    </HomeAssistantProvider>
+    <ErrorBoundary>
+      <HomeAssistantProvider>
+        <AppContent />
+      </HomeAssistantProvider>
+    </ErrorBoundary>
   )
 }
