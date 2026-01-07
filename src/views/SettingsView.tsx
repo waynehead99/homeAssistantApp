@@ -672,11 +672,11 @@ export function SettingsView() {
         </p>
       </section>
 
-      {/* AI Insights */}
+      {/* Home Insights */}
       <section className="glass-card p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-slate-800">AI Insights</h3>
+            <h3 className="text-sm font-medium text-slate-800">Home Insights</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               {isClaudeConfigured() ? 'Claude API connected' : 'API key not configured'}
             </p>

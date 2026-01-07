@@ -178,7 +178,7 @@ export function HomeView() {
 
   return (
     <div className="space-y-4 pb-20">
-      {/* AI Insights Card - only show when enabled */}
+      {/* Home Insights Card - only show when enabled */}
       {settings.aiInsightsEnabled && (
         <div className="glass-card bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
           <div className="flex items-start justify-between mb-2">
@@ -188,7 +188,7 @@ export function HomeView() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
-              <h3 className="font-medium text-blue-700">AI Insights</h3>
+              <h3 className="font-medium text-blue-700">Home Insights</h3>
             </div>
             <div className="flex items-center gap-1">
               {/* Voice chat button */}
