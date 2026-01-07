@@ -50,6 +50,8 @@ export interface AppSettings {
   pinnedEntities: string[] // entity_ids to show on homepage for quick access
   pinnedAutomations: string[] // automation entity_ids to show on homepage
   notificationRecipients: string[] // mobile app device names for notifications (e.g., "waynes_iphone")
+  openaiApiKey?: string // OpenAI API key for voice features (Whisper STT + TTS)
+  openaiVoice?: string // Selected OpenAI TTS voice (alloy, echo, fable, onyx, nova, shimmer)
 }
 
 // Default settings

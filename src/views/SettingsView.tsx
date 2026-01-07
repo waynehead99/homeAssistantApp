@@ -4,7 +4,6 @@ import { getBaseUrl } from '../services/homeAssistant'
 import { isClaudeConfigured } from '../services/claude'
 import { useAttentionAlerts } from '../hooks/useAttentionAlerts'
 import {
-  isOpenAIConfigured,
   getOpenAIApiKey,
   setOpenAIApiKey,
   removeOpenAIApiKey,
@@ -64,15 +63,34 @@ export function SettingsView() {
   const [selectedVoice, setSelectedVoiceState] = useState<VoiceId>('nova')
   const [showOpenAIKey, setShowOpenAIKey] = useState(false)
 
-  // Initialize OpenAI state
+  // Initialize OpenAI state from HA-synced settings (with localStorage fallback)
   useEffect(() => {
-    setOpenAIConfigured(isOpenAIConfigured())
-    setSelectedVoiceState(getSelectedVoice())
-    const existingKey = getOpenAIApiKey()
-    if (existingKey) {
-      setOpenAIKey(existingKey)
+    // Priority: HA settings > localStorage
+    const haKey = settings.openaiApiKey
+    const haVoice = settings.openaiVoice as VoiceId | undefined
+    const localKey = getOpenAIApiKey()
+    const localVoice = getSelectedVoice()
+
+    // Use HA settings if available, otherwise localStorage
+    const effectiveKey = haKey || localKey || ''
+    const effectiveVoice = haVoice || localVoice || 'nova'
+
+    setOpenAIKey(effectiveKey)
+    setSelectedVoiceState(effectiveVoice)
+    setOpenAIConfigured(!!effectiveKey)
+
+    // If HA has settings but localStorage doesn't, sync to localStorage for the service
+    if (haKey && !localKey) {
+      setOpenAIApiKey(haKey)
     }
-  }, [])
+    if (haVoice && haVoice !== localVoice) {
+      setSelectedVoice(haVoice)
+    }
+    // If localStorage has settings but HA doesn't, sync to HA
+    if (localKey && !haKey) {
+      updateSettings({ openaiApiKey: localKey, openaiVoice: localVoice })
+    }
+  }, [settings.openaiApiKey, settings.openaiVoice])
 
   const { checking, minutesUntilNextCheck, testAlerts, lastCheckItems } = useAttentionAlerts()
 
@@ -708,7 +726,9 @@ export function SettingsView() {
               onChange={(e) => {
                 const voice = e.target.value as VoiceId
                 setSelectedVoiceState(voice)
+                // Save to both localStorage and HA settings
                 setSelectedVoice(voice)
+                updateSettings({ openaiVoice: voice })
               }}
               className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
             >
@@ -755,7 +775,9 @@ export function SettingsView() {
             {openAIConfigured ? (
               <button
                 onClick={() => {
+                  // Remove from both HA settings and localStorage
                   removeOpenAIApiKey()
+                  updateSettings({ openaiApiKey: undefined, openaiVoice: undefined })
                   setOpenAIKey('')
                   setOpenAIConfigured(false)
                 }}
@@ -767,7 +789,10 @@ export function SettingsView() {
               <button
                 onClick={() => {
                   if (openAIKey.trim()) {
-                    setOpenAIApiKey(openAIKey.trim())
+                    const key = openAIKey.trim()
+                    // Save to both HA settings and localStorage
+                    setOpenAIApiKey(key)
+                    updateSettings({ openaiApiKey: key, openaiVoice: selectedVoice })
                     setOpenAIConfigured(true)
                   }
                 }}
