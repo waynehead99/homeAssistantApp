@@ -47,6 +47,7 @@ async function apiFetch<T>(
 
   const response = await fetch(url, {
     ...options,
+    cache: 'no-store', // Prevent browser caching for real-time updates
     headers: {
       ...getHeaders(),
       ...options.headers,
