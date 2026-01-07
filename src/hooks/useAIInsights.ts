@@ -24,6 +24,7 @@ const CACHE_DURATION = 5 * 60 * 1000
 // Module-level cache that persists across component mounts
 let cachedInsight: string | null = null
 let lastGeneratedTime = 0
+let lastPeopleStatus: string = '' // Track people status to invalidate cache on change
 
 // Module-level cache for home context (for chat)
 let cachedHomeContext: string | null = null
@@ -116,12 +117,18 @@ export function useAIInsights() {
       return
     }
 
-    // Check cache unless forced refresh
+    // Check cache unless forced refresh or people status changed
     const now = Date.now()
-    if (!force && cachedInsight && (now - lastGeneratedTime) < CACHE_DURATION) {
+    const currentPeopleStatus = filteredPeople.map(p => `${p.entity_id}:${p.state}`).sort().join(',')
+    const peopleChanged = currentPeopleStatus !== lastPeopleStatus
+
+    if (!force && !peopleChanged && cachedInsight && (now - lastGeneratedTime) < CACHE_DURATION) {
       setInsight(cachedInsight)
       return
     }
+
+    // Update people status tracker
+    lastPeopleStatus = currentPeopleStatus
 
     setLoading(true)
     setError(null)
