@@ -159,10 +159,11 @@ export async function geocodeAddress(address: string): Promise<{ lat: number; lo
 // Generate the prompt for Claude
 function buildPrompt(context: HomeContext): string {
   const timeOfDay = getTimeOfDay(context.time)
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
   let prompt = `You are a friendly home assistant for a family. Provide a brief, helpful insight about their day. This is a normal, lived-in home - not a security system. Be warm and conversational, like a helpful friend.
 
-Current Time: ${context.time} (${timeOfDay})
+Current Time: ${context.time} (${timeOfDay}) - ${timezone}
 Date: ${context.date}
 
 `
@@ -360,7 +361,12 @@ function getTimeOfDay(time: string): string {
 function formatEventTime(isoString: string): string {
   try {
     const date = new Date(isoString)
-    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+    // Use explicit timezone formatting to ensure correct local time
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+    })
   } catch {
     return isoString
   }
