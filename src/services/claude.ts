@@ -341,6 +341,7 @@ ATTENTION ITEM RULES:
 Other guidelines:
 - This is a normal family home, NOT a security facility
 - Be positive and helpful, not alarming
+- Use plain text only - no markdown, no **bold**, no bullet points
 
 Respond with only 1-2 friendly sentences. No greetings, sign-offs, or security warnings.`
 
@@ -532,6 +533,7 @@ Guidelines:
 - If asked about something not in the data, say you don't have that information
 - Keep responses concise but informative (2-4 sentences unless more detail is requested)
 - You can reference weather, calendar events, device states, and sensor readings
+- Use plain text only - no markdown formatting, no **bold**, no bullet points or lists. Write in natural sentences.
 ${canControlLights ? `- You CAN control lights using the control_light tool. When the user asks to turn lights on/off, use the tool with the correct entity_id from the Detailed Lights List.
 - Match light names flexibly - "basement lights" matches "Basement Lights", "living room" matches lights in the Living Room area, etc.
 - After controlling a light, confirm what you did.` : '- Light control is not currently available.'}`
