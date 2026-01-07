@@ -335,6 +335,11 @@ export function useAIInsights() {
             return false
           }
 
+          // Exclude power sensors (W) - these measure battery power draw, not level
+          if (entityId.includes('power') || s.attributes.unit_of_measurement === 'W') {
+            return false
+          }
+
           const level = parseFloat(s.state)
           return !isNaN(level) && level <= LOW_BATTERY_THRESHOLD && level > 0
         })
