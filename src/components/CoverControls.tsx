@@ -219,15 +219,15 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
       {/* Status Display */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-3xl font-light text-white text-shadow">
+          <div className="text-3xl font-light text-slate-800">
             {supportsSetPosition ? `${position}%` : (isOpen ? 'Open' : 'Closed')}
           </div>
-          <div className="text-sm text-slate-400">{getStatusLabel()}</div>
+          <div className="text-sm text-slate-500">{getStatusLabel()}</div>
         </div>
         <div
           className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 ${
             isOpen
-              ? 'bg-gradient-to-br from-blue-400/30 to-cyan-500/20 text-blue-400 glow-blue'
+              ? 'bg-blue-500/15 text-blue-600 glow-blue'
               : 'glass-panel text-slate-400'
           }`}
         >
@@ -249,8 +249,8 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
             disabled={isOpen && !isMoving}
             className={`flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 ${
               isOpen && !isMoving
-                ? 'glass-panel opacity-40 text-slate-600 cursor-not-allowed'
-                : 'glass-panel text-slate-300 hover:bg-white/10 active:scale-95'
+                ? 'glass-panel opacity-40 text-slate-400 cursor-not-allowed'
+                : 'glass-panel text-slate-600 hover:bg-slate-100 active:scale-95'
             }`}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -263,7 +263,7 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
         {supportsStop && (
           <button
             onClick={handleStop}
-            className="flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 glass-panel text-slate-300 hover:bg-white/10 active:scale-95"
+            className="flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 glass-panel text-slate-600 hover:bg-slate-100 active:scale-95"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6 6h12v12H6z"/>
@@ -278,8 +278,8 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
             disabled={isClosed && !isMoving}
             className={`flex-1 flex flex-col items-center gap-1.5 p-4 rounded-xl transition-all duration-300 ${
               isClosed && !isMoving
-                ? 'glass-panel opacity-40 text-slate-600 cursor-not-allowed'
-                : 'glass-panel text-slate-300 hover:bg-white/10 active:scale-95'
+                ? 'glass-panel opacity-40 text-slate-400 cursor-not-allowed'
+                : 'glass-panel text-slate-600 hover:bg-slate-100 active:scale-95'
             }`}
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -293,9 +293,9 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
       {/* Position Slider */}
       {supportsSetPosition && (
         <div className="glass-panel p-4">
-          <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Position</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">Position</div>
           <div className="flex items-center gap-4">
-            <span className="text-slate-500 text-sm w-12">Closed</span>
+            <span className="text-slate-400 text-sm w-12">Closed</span>
             <input
               type="range"
               min={0}
@@ -307,18 +307,18 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
               onTouchEnd={handlePositionCommit}
               className="slider-3d flex-1"
             />
-            <span className="text-slate-500 text-sm w-10 text-right">Open</span>
+            <span className="text-slate-400 text-sm w-10 text-right">Open</span>
           </div>
-          <div className="text-center text-sm text-white mt-2">{localPosition}%</div>
+          <div className="text-center text-sm text-slate-700 mt-2">{localPosition}%</div>
         </div>
       )}
 
       {/* Tilt Position Slider */}
       {supportsTilt && (
         <div className="glass-panel p-4">
-          <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Tilt</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">Tilt</div>
           <div className="flex items-center gap-4">
-            <span className="text-slate-500 text-sm w-8">0°</span>
+            <span className="text-slate-400 text-sm w-8">0°</span>
             <input
               type="range"
               min={0}
@@ -330,14 +330,14 @@ export function CoverControls({ entity, onUpdate }: CoverControlsProps) {
               onTouchEnd={handleTiltCommit}
               className="slider-3d flex-1"
             />
-            <span className="text-slate-500 text-sm w-12 text-right">90°</span>
+            <span className="text-slate-400 text-sm w-12 text-right">90°</span>
           </div>
-          <div className="text-center text-sm text-white mt-2">{localTiltPosition}%</div>
+          <div className="text-center text-sm text-slate-700 mt-2">{localTiltPosition}%</div>
         </div>
       )}
 
       {/* Device Info */}
-      <div className="text-xs text-slate-500 text-center">
+      <div className="text-xs text-slate-400 text-center">
         {getDeviceClassLabel()} • {entity.attributes.friendly_name || entity.entity_id}
       </div>
     </div>

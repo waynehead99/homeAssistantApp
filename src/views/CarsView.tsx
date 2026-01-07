@@ -389,8 +389,8 @@ export function CarsView() {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <div className="glass-card p-8">
           <div className="text-6xl mb-4">🚗</div>
-          <h2 className="text-xl font-semibold text-white mb-2 text-shadow">No Vehicles Found</h2>
-          <p className="text-slate-400 max-w-sm">
+          <h2 className="text-xl font-semibold text-slate-800 mb-2">No Vehicles Found</h2>
+          <p className="text-slate-500 max-w-sm">
             Connect your Mercedes or Ford vehicle to Home Assistant to see it here.
           </p>
         </div>
@@ -414,12 +414,6 @@ function CarCard({ car }: { car: CarData }) {
     return '🚗'
   }
 
-  const getBrandGlow = () => {
-    if (car.brand === 'mercedes') return 'glow-purple'
-    if (car.brand === 'ford') return 'glow-blue'
-    return ''
-  }
-
   // Determine primary energy source display
   const hasBattery = car.batteryLevel !== undefined
   const hasBatteryStatus = car.batteryStatus !== undefined
@@ -429,31 +423,31 @@ function CarCard({ car }: { car: CarData }) {
   // Get battery status color based on text value
   const getBatteryStatusColor = (status: string) => {
     const s = status.toLowerCase()
-    if (s === 'green' || s === 'good' || s === 'ok') return { text: 'text-green-400', bg: 'bg-green-500/20' }
-    if (s === 'yellow' || s === 'warning' || s === 'medium') return { text: 'text-yellow-400', bg: 'bg-yellow-500/20' }
-    if (s === 'red' || s === 'critical' || s === 'low') return { text: 'text-red-400', bg: 'bg-red-500/20' }
-    return { text: 'text-slate-400', bg: 'bg-slate-700' }
+    if (s === 'green' || s === 'good' || s === 'ok') return { text: 'text-green-600', bg: 'bg-green-500/15' }
+    if (s === 'yellow' || s === 'warning' || s === 'medium') return { text: 'text-yellow-600', bg: 'bg-yellow-500/15' }
+    if (s === 'red' || s === 'critical' || s === 'low') return { text: 'text-red-600', bg: 'bg-red-500/15' }
+    return { text: 'text-slate-500', bg: 'bg-slate-200' }
   }
 
   return (
-    <div className={`glass-card overflow-hidden ${getBrandGlow()}`}>
+    <div className="glass-card overflow-hidden">
       {/* Header */}
       <div className="px-5 pt-5 pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{getBrandIcon()}</span>
             <div>
-              <h2 className="text-lg font-semibold text-white text-shadow">{car.name}</h2>
+              <h2 className="text-lg font-semibold text-slate-800">{car.name}</h2>
               {car.location && (
-                <p className={`text-sm ${car.isHome ? 'text-green-400' : 'text-slate-400'}`}>
+                <p className={`text-sm ${car.isHome ? 'text-green-600' : 'text-slate-500'}`}>
                   {car.isHome ? '📍 ' : ''}{car.location}
                 </p>
               )}
             </div>
           </div>
           {car.isLocked !== undefined && (
-            <div className={`glass-panel px-3 py-1.5 rounded-lg ${car.isLocked ? 'bg-green-500/20' : 'bg-yellow-500/20'}`}>
-              <span className={`text-sm font-medium ${car.isLocked ? 'text-green-400' : 'text-yellow-400'}`}>
+            <div className={`glass-panel px-3 py-1.5 rounded-lg ${car.isLocked ? 'bg-green-500/15' : 'bg-yellow-500/15'}`}>
+              <span className={`text-sm font-medium ${car.isLocked ? 'text-green-600' : 'text-yellow-600'}`}>
                 {car.isLocked ? '🔒 Locked' : '🔓 Unlocked'}
               </span>
             </div>
@@ -463,13 +457,13 @@ function CarCard({ car }: { car: CarData }) {
 
       {/* Energy Levels */}
       {(hasBattery || hasBatteryStatus || hasFuel) && (
-        <div className="px-5 py-4 border-t border-white/5">
+        <div className="px-5 py-4 border-t border-slate-200">
           <div className="grid grid-cols-2 gap-4">
             {/* Battery Status - text-based (Mercedes style) - show this FIRST if available */}
             {hasBatteryStatus && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-400">Battery</span>
+                  <span className="text-sm text-slate-500">Battery</span>
                 </div>
                 <div className={`glass-panel px-3 py-2 rounded-lg ${getBatteryStatusColor(car.batteryStatus!).bg}`}>
                   <span className={`text-sm font-medium capitalize ${getBatteryStatusColor(car.batteryStatus!).text}`}>
@@ -483,10 +477,10 @@ function CarCard({ car }: { car: CarData }) {
             {!hasBatteryStatus && hasBattery && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-400">Battery</span>
-                  <span className="text-sm font-medium text-white text-shadow">{Math.round(car.batteryLevel!)}%</span>
+                  <span className="text-sm text-slate-500">Battery</span>
+                  <span className="text-sm font-medium text-slate-800">{Math.round(car.batteryLevel!)}%</span>
                 </div>
-                <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       car.batteryLevel! > 50 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
@@ -496,7 +490,7 @@ function CarCard({ car }: { car: CarData }) {
                   />
                 </div>
                 {car.isCharging && (
-                  <p className="text-xs text-green-400 mt-1">⚡ Charging</p>
+                  <p className="text-xs text-green-600 mt-1">⚡ Charging</p>
                 )}
               </div>
             )}
@@ -505,10 +499,10 @@ function CarCard({ car }: { car: CarData }) {
             {hasFuel && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-400">Fuel</span>
-                  <span className="text-sm font-medium text-white text-shadow">{Math.round(car.fuelLevel!)}%</span>
+                  <span className="text-sm text-slate-500">Fuel</span>
+                  <span className="text-sm font-medium text-slate-800">{Math.round(car.fuelLevel!)}%</span>
                 </div>
-                <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       car.fuelLevel! > 50 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
@@ -524,21 +518,21 @@ function CarCard({ car }: { car: CarData }) {
       )}
 
       {/* Key Stats */}
-      <div className="px-5 py-4 border-t border-white/5">
+      <div className="px-5 py-4 border-t border-slate-200">
         <div className="grid grid-cols-3 gap-4 text-center">
           {/* Range */}
           {primaryRange !== undefined && (
             <div className="glass-panel p-3 rounded-xl">
-              <p className="text-2xl font-semibold text-white text-shadow">{Math.round(primaryRange)}</p>
-              <p className="text-xs text-slate-400">mi range</p>
+              <p className="text-2xl font-semibold text-slate-800">{Math.round(primaryRange)}</p>
+              <p className="text-xs text-slate-500">mi range</p>
             </div>
           )}
 
           {/* Mileage */}
           {car.mileage !== undefined && (
             <div className="glass-panel p-3 rounded-xl">
-              <p className="text-2xl font-semibold text-white text-shadow">{car.mileage.toLocaleString()}</p>
-              <p className="text-xs text-slate-400">miles</p>
+              <p className="text-2xl font-semibold text-slate-800">{Math.round(car.mileage).toLocaleString()}</p>
+              <p className="text-xs text-slate-500">miles</p>
             </div>
           )}
 
@@ -552,10 +546,10 @@ function CarCard({ car }: { car: CarData }) {
 
       {/* Alerts - Doors/Windows open */}
       {((car.doorsOpen && car.doorsOpen.length > 0) || (car.windowsOpen && car.windowsOpen.length > 0)) && (
-        <div className="px-5 py-3 bg-yellow-500/10 border-t border-yellow-500/20 glow-yellow">
+        <div className="px-5 py-3 bg-yellow-500/10 border-t border-yellow-500/20">
           <div className="flex items-center gap-2">
-            <span className="text-yellow-400">⚠️</span>
-            <div className="text-sm text-yellow-400 text-shadow">
+            <span className="text-yellow-600">⚠️</span>
+            <div className="text-sm text-yellow-700">
               {car.doorsOpen && car.doorsOpen.length > 0 && (
                 <span>{car.doorsOpen.length} door{car.doorsOpen.length > 1 ? 's' : ''} open</span>
               )}
@@ -572,16 +566,16 @@ function CarCard({ car }: { car: CarData }) {
 
       {/* Maintenance - Oil Life & DEF */}
       {(car.oilLife !== undefined || car.defLevel !== undefined) && (
-        <div className="px-5 py-4 border-t border-white/5">
+        <div className="px-5 py-4 border-t border-slate-200">
           <div className="grid grid-cols-2 gap-4">
             {/* Oil Life */}
             {car.oilLife !== undefined && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-400">Oil Life</span>
-                  <span className="text-sm font-medium text-white text-shadow">{Math.round(car.oilLife)}%</span>
+                  <span className="text-sm text-slate-500">Oil Life</span>
+                  <span className="text-sm font-medium text-slate-800">{Math.round(car.oilLife)}%</span>
                 </div>
-                <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       car.oilLife > 30 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
@@ -591,7 +585,7 @@ function CarCard({ car }: { car: CarData }) {
                   />
                 </div>
                 {car.oilLife <= 10 && (
-                  <p className="text-xs text-red-400 mt-1">Service needed</p>
+                  <p className="text-xs text-red-600 mt-1">Service needed</p>
                 )}
               </div>
             )}
@@ -600,10 +594,10 @@ function CarCard({ car }: { car: CarData }) {
             {car.defLevel !== undefined && (
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-400">DEF</span>
-                  <span className="text-sm font-medium text-white text-shadow">{Math.round(car.defLevel)}%</span>
+                  <span className="text-sm text-slate-500">DEF</span>
+                  <span className="text-sm font-medium text-slate-800">{Math.round(car.defLevel)}%</span>
                 </div>
-                <div className="h-2 bg-slate-700/50 rounded-full overflow-hidden">
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       car.defLevel > 30 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' :
@@ -613,7 +607,7 @@ function CarCard({ car }: { car: CarData }) {
                   />
                 </div>
                 {car.defLevel <= 10 && (
-                  <p className="text-xs text-red-400 mt-1">Refill needed</p>
+                  <p className="text-xs text-red-600 mt-1">Refill needed</p>
                 )}
               </div>
             )}
@@ -623,13 +617,13 @@ function CarCard({ car }: { car: CarData }) {
 
       {/* Tire Pressure */}
       {car.tirePressure && Object.keys(car.tirePressure).length > 0 && (
-        <div className="px-5 py-4 border-t border-white/5">
-          <p className="text-sm text-slate-400 mb-3">Tire Pressure</p>
+        <div className="px-5 py-4 border-t border-slate-200">
+          <p className="text-sm text-slate-500 mb-3">Tire Pressure</p>
           <div className="grid grid-cols-2 gap-2">
             {Object.entries(car.tirePressure).map(([tire, pressure]) => (
               <div key={tire} className="flex items-center justify-between glass-panel rounded-lg px-3 py-2">
-                <span className="text-xs text-slate-400 capitalize">{tire}</span>
-                <span className="text-sm font-medium text-white text-shadow">{pressure} PSI</span>
+                <span className="text-xs text-slate-500 capitalize">{tire}</span>
+                <span className="text-sm font-medium text-slate-800">{pressure} PSI</span>
               </div>
             ))}
           </div>

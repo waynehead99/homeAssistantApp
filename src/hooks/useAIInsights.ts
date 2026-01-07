@@ -1,5 +1,13 @@
-import { useState, useCallback, useRef, useMemo } from 'react'
-import { generateHomeInsights, isClaudeConfigured, type HomeContext } from '../services/claude'
+import { useState, useCallback, useMemo } from 'react'
+import {
+  generateHomeInsights,
+  isClaudeConfigured,
+  fetchWeatherForecast,
+  getWeatherForEventTime,
+  geocodeAddress,
+  estimateTravelTime,
+  type HomeContext
+} from '../services/claude'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { calendarService } from '../services/homeAssistant'
 import { shouldShowBinarySensor } from '../utils/sensorFilters'
@@ -8,14 +16,17 @@ import type { CalendarEvent } from '../types/homeAssistant'
 // Cache duration in milliseconds (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000
 
+// Module-level cache that persists across component mounts
+let cachedInsight: string | null = null
+let lastGeneratedTime = 0
+
 export function useAIInsights() {
-  const [insight, setInsight] = useState<string | null>(null)
+  const [insight, setInsight] = useState<string | null>(cachedInsight)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const lastGeneratedRef = useRef<number>(0)
-  const cacheRef = useRef<string | null>(null)
 
   const {
+    sensors,
     binarySensors,
     weather,
     calendars,
@@ -97,8 +108,8 @@ export function useAIInsights() {
 
     // Check cache unless forced refresh
     const now = Date.now()
-    if (!force && cacheRef.current && (now - lastGeneratedRef.current) < CACHE_DURATION) {
-      setInsight(cacheRef.current)
+    if (!force && cachedInsight && (now - lastGeneratedTime) < CACHE_DURATION) {
+      setInsight(cachedInsight)
       return
     }
 
@@ -156,22 +167,90 @@ export function useAIInsights() {
       })
       if (filteredCalendars.length > 0) {
         const calendarIds = filteredCalendars.map(c => c.entity_id)
-        calendarEvents = await calendarService.getAllEvents(calendarIds, 1)
+        calendarEvents = await calendarService.getAllEvents(calendarIds, 2) // Get 2 days for forecast matching
       }
 
-      // Format calendar events for context
-      const formattedEvents = calendarEvents.map(event => ({
-        summary: event.summary,
-        start: event.start.dateTime || event.start.date || '',
-        end: event.end.dateTime || event.end.date || '',
-        location: event.location,
-      }))
+      // Get weather forecast - try HA first, then fallback to Open-Meteo
+      let hourlyForecast = weatherData?.forecast || null
+      if (!hourlyForecast || hourlyForecast.length < 12) {
+        // Fetch from Open-Meteo for Aurora, CO
+        const openMeteoForecast = await fetchWeatherForecast()
+        if (openMeteoForecast) {
+          hourlyForecast = openMeteoForecast
+        }
+      }
 
-      // Get people status
-      const peopleStatus = filteredPeople.map(person => ({
+      // Get people with their locations
+      const peopleWithLocations = filteredPeople.map(person => ({
         name: person.attributes.friendly_name || person.entity_id.split('.')[1],
         state: person.state === 'home' ? 'Home' : person.state === 'not_home' ? 'Away' : person.state,
+        latitude: person.attributes.latitude,
+        longitude: person.attributes.longitude,
       }))
+
+      // Find home person's location (first person who is home with GPS)
+      const homePersonWithGPS = filteredPeople.find(
+        p => p.state === 'home' && p.attributes.latitude && p.attributes.longitude
+      )
+
+      // Format calendar events with weather forecasts and travel time
+      const formattedEvents = await Promise.all(calendarEvents.map(async event => {
+        const startTime = event.start.dateTime || event.start.date || ''
+        const eventStart = new Date(startTime)
+        const now = new Date()
+
+        // Get weather forecast for event time
+        let weatherAtEvent: { temp: number; condition: string } | undefined
+        if (hourlyForecast) {
+          const weather = getWeatherForEventTime(startTime, hourlyForecast)
+          if (weather) weatherAtEvent = weather
+        }
+
+        // Calculate travel time if event has location and we have person GPS
+        let travelTimeMinutes: number | undefined
+        let isReachable = true
+
+        if (event.location && homePersonWithGPS) {
+          // Geocode the event location
+          const eventCoords = await geocodeAddress(event.location)
+          if (eventCoords && homePersonWithGPS.attributes.latitude && homePersonWithGPS.attributes.longitude) {
+            travelTimeMinutes = estimateTravelTime(
+              homePersonWithGPS.attributes.latitude,
+              homePersonWithGPS.attributes.longitude,
+              eventCoords.lat,
+              eventCoords.lon
+            )
+
+            // Check if event is reachable (event hasn't started and we have time to get there)
+            const minutesUntilEvent = (eventStart.getTime() - now.getTime()) / (1000 * 60)
+            if (minutesUntilEvent < 0) {
+              // Event already started
+              isReachable = false
+            } else if (minutesUntilEvent < travelTimeMinutes) {
+              // Not enough time to get there
+              isReachable = false
+            }
+          }
+        } else {
+          // No location - just check if event already started
+          if (eventStart.getTime() < now.getTime()) {
+            isReachable = false
+          }
+        }
+
+        return {
+          summary: event.summary,
+          start: startTime,
+          end: event.end.dateTime || event.end.date || '',
+          location: event.location,
+          weatherAtEvent,
+          travelTimeMinutes,
+          isReachable,
+        }
+      }))
+
+      // Get people status (simplified for prompt, locations used above)
+      const peopleStatus = peopleWithLocations
 
       // Count lights - exclude hidden entities
       const lightsOn = visibleLights.filter(l => l.state === 'on').length
@@ -217,6 +296,53 @@ export function useAIInsights() {
         state: l.state,
       }))
 
+      // === ATTENTION ITEMS (include hidden entities for these) ===
+
+      // 1. Low battery devices - check ALL sensors (even hidden ones)
+      const LOW_BATTERY_THRESHOLD = 20
+      const lowBatteryDevices = sensors
+        .filter(s => {
+          const isBattery = s.attributes.device_class === 'battery' ||
+            s.entity_id.toLowerCase().includes('battery')
+          if (!isBattery) return false
+          const level = parseFloat(s.state)
+          return !isNaN(level) && level <= LOW_BATTERY_THRESHOLD && level > 0
+        })
+        .map(s => ({
+          name: s.attributes.friendly_name || s.entity_id.split('.')[1].replace(/_/g, ' '),
+          level: Math.round(parseFloat(s.state))
+        }))
+        .sort((a, b) => a.level - b.level) // Sort by lowest first
+
+      // 2. Check if it's dark (after sunset / before sunrise)
+      const currentHour = new Date().getHours()
+      const isDark = currentHour >= 20 || currentHour < 6 // After 8pm or before 6am
+
+      // 3. Front door open after dark - check ALL binary sensors (even hidden ones)
+      const frontDoorSensor = binarySensors.find(s => {
+        const name = (s.attributes.friendly_name || s.entity_id).toLowerCase()
+        return s.attributes.device_class === 'door' &&
+          (name.includes('front door') || name.includes('front_door'))
+      })
+      const frontDoorOpenAfterDark = isDark && frontDoorSensor?.state === 'on'
+
+      // 4. Windows open with temperature difference - check ALL binary sensors
+      const outsideTemp = weatherData?.temp
+      const insideTemp = visibleClimate[0]?.attributes.current_temperature
+      const TEMP_DIFF_THRESHOLD = 10
+
+      let windowsOpenWithTempDiff: Array<{ name: string; tempDiff: number }> = []
+      if (outsideTemp !== undefined && insideTemp !== undefined && insideTemp - outsideTemp >= TEMP_DIFF_THRESHOLD) {
+        windowsOpenWithTempDiff = binarySensors
+          .filter(s => {
+            return s.attributes.device_class === 'window' && s.state === 'on'
+          })
+          .map(s => ({
+            name: s.attributes.friendly_name || s.entity_id.split('.')[1].replace(/_/g, ' '),
+            tempDiff: Math.round(insideTemp - outsideTemp)
+          }))
+      }
+
       // Build context
       const context: HomeContext = {
         alerts,
@@ -233,13 +359,19 @@ export function useAIInsights() {
         locks: lockData,
         time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
         date: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }),
+        // Attention items
+        lowBatteryDevices,
+        frontDoorOpenAfterDark,
+        windowsOpenWithTempDiff,
+        insideTemp,
+        isDark,
       }
 
       // Generate insight
       const result = await generateHomeInsights(context)
       setInsight(result)
-      cacheRef.current = result
-      lastGeneratedRef.current = now
+      cachedInsight = result
+      lastGeneratedTime = now
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate insight'
       setError(message)
@@ -247,7 +379,7 @@ export function useAIInsights() {
     } finally {
       setLoading(false)
     }
-  }, [visibleBinarySensors, visibleLights, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, weather, calendars, filteredPeople, settings])
+  }, [visibleBinarySensors, visibleLights, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, weather, calendars, filteredPeople, settings, sensors, binarySensors])
 
   const refresh = useCallback(() => {
     generateInsight(true)

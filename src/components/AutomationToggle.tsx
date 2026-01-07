@@ -67,7 +67,7 @@ export function AutomationToggle({ entity, onUpdate, displayName }: AutomationTo
 
   // Different colors for scripts vs automations
   const bgColor = isScript ? 'bg-blue-500/20' : 'bg-emerald-500/20'
-  const textColor = isScript ? 'text-blue-400' : 'text-emerald-400'
+  const textColor = isScript ? 'text-blue-600' : 'text-emerald-600'
   const buttonBg = isScript ? 'bg-blue-500' : 'bg-emerald-500'
   const buttonHover = isScript ? 'hover:bg-blue-400' : 'hover:bg-emerald-400'
 
@@ -76,7 +76,7 @@ export function AutomationToggle({ entity, onUpdate, displayName }: AutomationTo
       <button
         onClick={() => setShowConfirm(true)}
         disabled={loading}
-        className={`flex items-center gap-3 p-3 rounded-xl transition-all w-full text-left bg-slate-800 hover:bg-slate-700 active:scale-[0.98] ${
+        className={`flex items-center gap-3 p-3 rounded-xl transition-all w-full text-left glass-card hover:bg-slate-100 active:scale-[0.98] ${
           loading ? 'opacity-70 pointer-events-none' : ''
         }`}
       >
@@ -96,18 +96,18 @@ export function AutomationToggle({ entity, onUpdate, displayName }: AutomationTo
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white truncate">{name}</p>
+          <p className="text-sm font-medium text-slate-800 truncate">{name}</p>
           <p className="text-xs text-slate-500">Last: {formatLastTriggered(lastTriggered)}</p>
         </div>
-        <svg className="w-4 h-4 text-slate-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-4 h-4 text-slate-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </button>
 
       {/* Confirmation Modal */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-xl border border-slate-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 max-w-sm w-full shadow-xl border border-slate-200">
             <div className="flex items-center gap-3 mb-4">
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgColor}`}>
                 {isScript ? (
@@ -121,19 +121,19 @@ export function AutomationToggle({ entity, onUpdate, displayName }: AutomationTo
                 )}
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-white">Run {isScript ? 'Script' : 'Automation'}</h3>
-                <p className="text-sm text-slate-400">{name}</p>
+                <h3 className="text-lg font-semibold text-slate-800">Run {isScript ? 'Script' : 'Automation'}</h3>
+                <p className="text-sm text-slate-500">{name}</p>
               </div>
             </div>
 
-            <p className="text-slate-300 mb-6">
+            <p className="text-slate-600 mb-6">
               Are you sure you want to run this {isScript ? 'script' : 'automation'}?
             </p>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 py-3 px-4 rounded-xl bg-slate-700 text-slate-300 font-medium hover:bg-slate-600 transition-colors"
+                className="flex-1 py-3 px-4 rounded-xl bg-slate-200 text-slate-700 font-medium hover:bg-slate-300 transition-colors"
               >
                 Cancel
               </button>

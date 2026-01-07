@@ -41,7 +41,7 @@ export default {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-mesh': 'radial-gradient(at 40% 20%, rgba(59, 130, 246, 0.1) 0px, transparent 50%), radial-gradient(at 80% 0%, rgba(168, 85, 247, 0.1) 0px, transparent 50%), radial-gradient(at 0% 50%, rgba(34, 197, 94, 0.05) 0px, transparent 50%)',
+        'gradient-mesh': 'radial-gradient(at 30% 10%, rgba(59, 130, 246, 0.08) 0px, transparent 50%), radial-gradient(at 80% 20%, rgba(34, 211, 238, 0.06) 0px, transparent 50%), radial-gradient(at 10% 60%, rgba(99, 102, 241, 0.05) 0px, transparent 50%), radial-gradient(at 90% 80%, rgba(34, 197, 94, 0.04) 0px, transparent 50%)',
       },
     },
   },

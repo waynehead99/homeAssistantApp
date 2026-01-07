@@ -28,13 +28,13 @@ const MODE_LABELS: Record<string, string> = {
 }
 
 const MODE_COLORS: Record<string, string> = {
-  off: 'text-slate-400 bg-slate-700',
-  heat: 'text-orange-400 bg-orange-400/20',
-  cool: 'text-blue-400 bg-blue-400/20',
-  heat_cool: 'text-purple-400 bg-purple-400/20',
-  auto: 'text-purple-400 bg-purple-400/20',
-  dry: 'text-cyan-400 bg-cyan-400/20',
-  fan_only: 'text-green-400 bg-green-400/20',
+  off: 'text-slate-500 bg-slate-200',
+  heat: 'text-orange-600 bg-orange-500/15',
+  cool: 'text-blue-600 bg-blue-500/15',
+  heat_cool: 'text-purple-600 bg-purple-500/15',
+  auto: 'text-purple-600 bg-purple-500/15',
+  dry: 'text-cyan-600 bg-cyan-500/15',
+  fan_only: 'text-green-600 bg-green-500/15',
 }
 
 export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
@@ -122,34 +122,34 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
     <div className={`space-y-6 ${loading ? 'opacity-70 pointer-events-none' : ''}`}>
       {/* Current Temperature Display */}
       <div className="text-center">
-        <div className="text-5xl font-light text-white mb-1">
+        <div className="text-5xl font-light text-slate-800 mb-1">
           {currentTemp ? `${Math.round(currentTemp)}°` : '--°'}
         </div>
-        <div className="text-sm text-slate-400">{getActionText()}</div>
+        <div className="text-sm text-slate-500">{getActionText()}</div>
       </div>
 
       {/* Target Temperature Control */}
       {currentMode !== 'off' && currentMode !== 'fan_only' && (
         <div className="glass-panel p-4">
-          <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Target Temperature</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">Target Temperature</div>
           <div className="flex items-center justify-center gap-6">
             <button
               onClick={() => handleTempChange(-1)}
-              className="w-12 h-12 rounded-full glass-button text-white text-2xl font-light transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+              className="w-12 h-12 rounded-full glass-button text-slate-700 text-2xl font-light transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
             >
               -
             </button>
-            <div className="text-4xl font-light text-white min-w-[80px] text-center text-shadow">
+            <div className="text-4xl font-light text-slate-800 min-w-[80px] text-center">
               {Math.round(localTemp)}°
             </div>
             <button
               onClick={() => handleTempChange(1)}
-              className="w-12 h-12 rounded-full glass-button text-white text-2xl font-light transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
+              className="w-12 h-12 rounded-full glass-button text-slate-700 text-2xl font-light transition-all hover:scale-105 active:scale-95 flex items-center justify-center"
             >
               +
             </button>
           </div>
-          <div className="text-xs text-slate-500 text-center mt-2">
+          <div className="text-xs text-slate-400 text-center mt-2">
             Range: {minTemp}° - {maxTemp}°
           </div>
         </div>
@@ -157,7 +157,7 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
 
       {/* Mode Selection */}
       <div>
-        <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Mode</div>
+        <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">Mode</div>
         <div className="grid grid-cols-3 gap-2">
           {hvacModes.map((mode) => {
             const isActive = currentMode === mode
@@ -169,7 +169,7 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
                 className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-300 ${
                   isActive
                     ? `${colors} ring-1 ring-current shadow-lg`
-                    : 'glass-panel text-slate-400 hover:bg-white/5'
+                    : 'glass-panel text-slate-500 hover:bg-slate-100'
                 }`}
               >
                 <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -185,7 +185,7 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
       </div>
 
       {/* Additional Info */}
-      <div className="text-xs text-slate-500 text-center">
+      <div className="text-xs text-slate-400 text-center">
         {entity.attributes.friendly_name || entity.entity_id}
       </div>
     </div>

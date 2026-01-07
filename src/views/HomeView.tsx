@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { useAIInsights } from '../hooks/useAIInsights'
 import { lightService, callService } from '../services/homeAssistant'
@@ -27,6 +27,7 @@ export function HomeView() {
   const { insight, loading, generateInsight, refresh: refreshInsight, isConfigured } = useAIInsights()
   const [loadingEntities, setLoadingEntities] = useState<Set<string>>(new Set())
   const [modalEntityRef, setModalEntityRef] = useState<ModalEntityRef>(null)
+  const insightLoadedRef = useRef(false)
 
   // Look up the actual entity from context - this updates when context updates
   const modalEntity = useMemo(() => {
@@ -62,12 +63,13 @@ export function HomeView() {
     }
   }, [modalEntityRef, climate, vacuums, alarms, fans, locks, covers])
 
-  // Generate insight on mount (only if enabled)
+  // Generate insight only once on mount (uses 5-minute cache in the hook)
   useEffect(() => {
-    if (isConfigured && settings.aiInsightsEnabled) {
+    if (isConfigured && settings.aiInsightsEnabled && !insightLoadedRef.current) {
+      insightLoadedRef.current = true
       generateInsight()
     }
-  }, [generateInsight, isConfigured, settings.aiInsightsEnabled])
+  }, [isConfigured, settings.aiInsightsEnabled, generateInsight])
 
   // Get pinned entities
   const pinnedEntities = (settings.pinnedEntities || [])
@@ -175,33 +177,33 @@ export function HomeView() {
     <div className="space-y-4 pb-20">
       {/* AI Insights Card - only show when enabled */}
       {settings.aiInsightsEnabled && (
-        <div className="glass-card bg-gradient-to-br from-purple-600/20 to-blue-600/20 p-4 glow-purple">
+        <div className="glass-card bg-gradient-to-br from-blue-500/10 to-cyan-500/10 p-4">
           <div className="flex items-start justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" viewBox="0 0 24 24" fill="currentColor">
+              <div className="w-8 h-8 bg-blue-500/15 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-blue-500" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
               </div>
-              <h3 className="font-medium text-purple-300 text-shadow">AI Insights</h3>
+              <h3 className="font-medium text-blue-700">AI Insights</h3>
             </div>
             <button
               onClick={refreshInsight}
               disabled={loading}
-              className="glass-button p-1.5 text-purple-400 hover:text-purple-300 rounded-lg transition-all disabled:opacity-50"
+              className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
             >
               <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
-          <p className="text-slate-200 text-sm leading-relaxed">
+          <p className="text-slate-700 text-sm leading-relaxed">
             {loading ? (
-              <span className="text-slate-400 animate-pulse">Analyzing your home...</span>
+              <span className="text-slate-500 animate-pulse">Analyzing your home...</span>
             ) : insight ? (
               insight
             ) : (
-              <span className="text-slate-400">Tap refresh to generate insights</span>
+              <span className="text-slate-500">Tap refresh to generate insights</span>
             )}
           </p>
         </div>
@@ -210,7 +212,7 @@ export function HomeView() {
       {/* Quick Access Entities */}
       {pinnedEntities.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-slate-400 px-1">Quick Access</h3>
+          <h3 className="text-sm font-medium text-slate-600 px-1">Quick Access</h3>
           <div className="grid grid-cols-2 gap-2">
             {pinnedEntities.map(entity => {
               if (!entity) return null
@@ -300,19 +302,19 @@ export function HomeView() {
 
               const { isActive, activeColor, statusText } = getEntityStyle()
               const colorClasses = {
-                yellow: { bg: 'bg-yellow-400/20', ring: 'ring-yellow-400/30', text: 'text-yellow-400' },
-                green: { bg: 'bg-green-400/20', ring: 'ring-green-400/30', text: 'text-green-400' },
-                orange: { bg: 'bg-orange-400/20', ring: 'ring-orange-400/30', text: 'text-orange-400' },
-                purple: { bg: 'bg-purple-400/20', ring: 'ring-purple-400/30', text: 'text-purple-400' },
-                red: { bg: 'bg-red-400/20', ring: 'ring-red-400/30', text: 'text-red-400' },
-                cyan: { bg: 'bg-cyan-400/20', ring: 'ring-cyan-400/30', text: 'text-cyan-400' },
-                blue: { bg: 'bg-blue-400/20', ring: 'ring-blue-400/30', text: 'text-blue-400' },
-                slate: { bg: 'bg-slate-700', ring: '', text: 'text-slate-500' },
+                yellow: { bg: 'bg-amber-500/15', ring: 'ring-amber-400/40', text: 'text-amber-600' },
+                green: { bg: 'bg-green-500/15', ring: 'ring-green-400/40', text: 'text-green-600' },
+                orange: { bg: 'bg-orange-500/15', ring: 'ring-orange-400/40', text: 'text-orange-600' },
+                purple: { bg: 'bg-purple-500/15', ring: 'ring-purple-400/40', text: 'text-purple-600' },
+                red: { bg: 'bg-red-500/15', ring: 'ring-red-400/40', text: 'text-red-600' },
+                cyan: { bg: 'bg-cyan-500/15', ring: 'ring-cyan-400/40', text: 'text-cyan-600' },
+                blue: { bg: 'bg-blue-500/15', ring: 'ring-blue-400/40', text: 'text-blue-600' },
+                slate: { bg: 'bg-slate-200', ring: '', text: 'text-slate-500' },
               }
               const colors = colorClasses[activeColor as keyof typeof colorClasses]
 
               const renderIcon = () => {
-                const iconClass = `w-5 h-5 ${isActive ? colors.text : 'text-slate-500'}`
+                const iconClass = `w-5 h-5 ${isActive ? colors.text : 'text-slate-400'}`
                 switch (entity.type) {
                   case 'light':
                     return (
@@ -388,20 +390,20 @@ export function HomeView() {
                   className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-300 ${
                     isActive
                       ? `glass-card ${colors.bg} ring-1 ${colors.ring}`
-                      : 'glass-panel hover:bg-white/5'
+                      : 'glass-panel hover:bg-slate-100'
                   } ${isLoading ? 'opacity-50' : ''}`}
                 >
-                  <div className={`p-2 rounded-lg transition-all duration-300 ${isActive ? colors.bg : 'bg-slate-700/50'}`}>
+                  <div className={`p-2 rounded-lg transition-all duration-300 ${isActive ? colors.bg : 'bg-slate-200'}`}>
                     {renderIcon()}
                   </div>
                   <div className="flex-1 text-left min-w-0">
-                    <p className="text-sm font-medium text-white line-clamp-2 leading-tight">{name}</p>
+                    <p className="text-sm font-medium text-slate-800 line-clamp-2 leading-tight">{name}</p>
                     <p className={`text-xs mt-0.5 ${isActive ? colors.text : 'text-slate-500'}`}>
                       {statusText}
                     </p>
                   </div>
                   {isComplexEntity && (
-                    <svg className="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                   )}
@@ -415,7 +417,7 @@ export function HomeView() {
       {/* Automations Section */}
       {pinnedAutomations.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-sm font-medium text-slate-400 px-1">Automations</h3>
+          <h3 className="text-sm font-medium text-slate-600 px-1">Automations</h3>
           <div className="grid grid-cols-1 gap-2">
             {pinnedAutomations.map(automation => {
               if (!automation) return null

@@ -226,7 +226,7 @@ export function SettingsView() {
         <select
           value={settings.primaryWeatherEntity || ''}
           onChange={(e) => handleWeatherChange(e.target.value)}
-          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         >
           <option value="">Auto (first available)</option>
           {weather.map((w) => (
@@ -246,7 +246,7 @@ export function SettingsView() {
           <h3 className="text-sm font-medium text-slate-400">Quick Access</h3>
           <button
             onClick={() => setShowEntityPicker(!showEntityPicker)}
-            className="glass-button px-3 py-1.5 bg-blue-600/80 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors"
+            className="glass-button px-3 py-1.5 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm text-white transition-colors"
           >
             {showEntityPicker ? 'Done' : 'Add Entities'}
           </button>
@@ -270,7 +270,7 @@ export function SettingsView() {
                     <span className="text-xs text-slate-500">
                       {getEntityIcon(entity.type)}
                     </span>
-                    <span className="text-sm text-white">{name}</span>
+                    <span className="text-sm text-slate-800">{name}</span>
                   </div>
                   <button
                     onClick={() => removePinnedEntity(entity.entity_id)}
@@ -292,13 +292,13 @@ export function SettingsView() {
 
         {/* Entity picker */}
         {showEntityPicker && (
-          <div className="border-t border-white/5 pt-3 mt-3">
+          <div className="border-t border-slate-200 pt-3 mt-3">
             <input
               type="text"
               value={entityFilter}
               onChange={(e) => setEntityFilter(e.target.value)}
               placeholder="Search entities..."
-              className="w-full glass-panel text-white rounded-lg px-3 py-2 mb-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+              className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2 mb-3 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
             />
             <div className="max-h-64 overflow-y-auto space-y-1 scrollbar-hide">
               {filteredEntities.map(entity => {
@@ -309,7 +309,7 @@ export function SettingsView() {
                     key={entity.entity_id}
                     onClick={() => togglePinnedEntity(entity.entity_id)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
-                      isPinned ? 'glass-panel bg-blue-600/20 text-blue-400' : 'glass-panel text-slate-300 hover:bg-white/5'
+                      isPinned ? 'glass-panel bg-blue-600/20 text-blue-400' : 'glass-panel text-slate-300 hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -338,7 +338,7 @@ export function SettingsView() {
           <h3 className="text-sm font-medium text-slate-400">Home Page Automations</h3>
           <button
             onClick={() => setShowAutomationPicker(!showAutomationPicker)}
-            className="glass-button px-3 py-1.5 bg-emerald-600/80 hover:bg-emerald-500 rounded-lg text-sm text-white transition-colors"
+            className="glass-button px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-sm text-white transition-colors"
           >
             {showAutomationPicker ? 'Done' : 'Add Automations'}
           </button>
@@ -363,7 +363,7 @@ export function SettingsView() {
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-xs">⚡</span>
-                    <span className={`text-sm ${isOn ? 'text-white' : 'text-slate-300'}`}>{name}</span>
+                    <span className={`text-sm ${isOn ? 'text-slate-800' : 'text-slate-600'}`}>{name}</span>
                     <span className={`text-xs ${isOn ? 'text-emerald-400' : 'text-slate-500'}`}>
                       {isOn ? 'On' : 'Off'}
                     </span>
@@ -388,13 +388,13 @@ export function SettingsView() {
 
         {/* Automation picker */}
         {showAutomationPicker && (
-          <div className="border-t border-white/5 pt-3 mt-3">
+          <div className="border-t border-slate-200 pt-3 mt-3">
             <input
               type="text"
               value={automationFilter}
               onChange={(e) => setAutomationFilter(e.target.value)}
               placeholder="Search automations..."
-              className="w-full glass-panel text-white rounded-lg px-3 py-2 mb-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm"
+              className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2 mb-3 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 text-sm"
             />
             <div className="max-h-64 overflow-y-auto space-y-1 scrollbar-hide">
               {filteredAutomations.map(entity => {
@@ -406,7 +406,7 @@ export function SettingsView() {
                     key={entity.entity_id}
                     onClick={() => togglePinnedAutomation(entity.entity_id)}
                     className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
-                      isPinned ? 'glass-panel bg-emerald-600/20 text-emerald-400' : 'glass-panel text-slate-300 hover:bg-white/5'
+                      isPinned ? 'glass-panel bg-emerald-600/20 text-emerald-400' : 'glass-panel text-slate-300 hover:bg-slate-100'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -445,7 +445,7 @@ export function SettingsView() {
           </div>
           <button
             onClick={() => setShowHiddenManager(!showHiddenManager)}
-            className="glass-button px-3 py-1.5 hover:bg-white/5 rounded-lg text-sm text-white transition-colors"
+            className="glass-button px-3 py-1.5 hover:bg-slate-100 rounded-lg text-sm text-slate-700 transition-colors"
           >
             {showHiddenManager ? 'Done' : 'Manage'}
           </button>
@@ -503,7 +503,7 @@ export function SettingsView() {
                 value={hiddenFilter}
                 onChange={(e) => setHiddenFilter(e.target.value)}
                 placeholder="Search entities to hide..."
-                className="w-full glass-panel text-white rounded-lg px-3 py-2 mb-3 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+                className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2 mb-3 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
               />
               <div className="max-h-48 overflow-y-auto space-y-1 scrollbar-hide">
                 {filteredHideableEntities.slice(0, 50).map(entity => {
@@ -516,7 +516,7 @@ export function SettingsView() {
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors ${
                         isHidden
                           ? 'glass-panel bg-red-500/20 text-red-400'
-                          : 'glass-panel text-slate-300 hover:bg-white/5'
+                          : 'glass-panel text-slate-300 hover:bg-slate-100'
                       }`}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -558,7 +558,7 @@ export function SettingsView() {
           value={settings.calendarPattern}
           onChange={(e) => handleCalendarPatternChange(e.target.value)}
           placeholder="e.g., erikson, family"
-          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         />
         <p className="text-xs text-slate-500 mt-2">
           Only show calendars matching this pattern. Supports regex (e.g., "erik|family").
@@ -592,7 +592,7 @@ export function SettingsView() {
           value={settings.peoplePattern}
           onChange={(e) => handlePeoplePatternChange(e.target.value)}
           placeholder="e.g., shelby|wayne"
-          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         />
         <p className="text-xs text-slate-500 mt-2">
           Only show people matching this pattern on the Home screen. Use "|" for multiple names.
@@ -603,7 +603,7 @@ export function SettingsView() {
       <section className="glass-card p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-white text-shadow">AI Insights</h3>
+            <h3 className="text-sm font-medium text-slate-800">AI Insights</h3>
             <p className="text-xs text-slate-500 mt-0.5">
               {isClaudeConfigured() ? 'Claude API connected' : 'API key not configured'}
             </p>
@@ -636,7 +636,7 @@ export function SettingsView() {
         <select
           value={settings.refreshInterval}
           onChange={(e) => handleRefreshIntervalChange(Number(e.target.value))}
-          className="w-full glass-panel text-white rounded-lg px-3 py-2.5 border border-white/10 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2.5 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
         >
           <option value={10}>10 seconds</option>
           <option value={30}>30 seconds</option>
@@ -661,7 +661,7 @@ export function SettingsView() {
           {hiddenRooms.size > 0 && (
             <button
               onClick={showAllRooms}
-              className="glass-button px-3 py-1.5 hover:bg-white/5 rounded-lg text-sm text-white transition-colors"
+              className="glass-button px-3 py-1.5 hover:bg-slate-100 rounded-lg text-sm text-slate-700 transition-colors"
             >
               Show All
             </button>
@@ -691,25 +691,25 @@ export function SettingsView() {
           <div className="mt-4 space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-slate-500">Home Assistant URL</span>
-              <span className="text-white truncate ml-4">{getBaseUrl() || 'Not configured'}</span>
+              <span className="text-slate-800 truncate ml-4">{getBaseUrl() || 'Not configured'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Last Updated</span>
-              <span className="text-white">
+              <span className="text-slate-800">
                 {lastUpdated ? lastUpdated.toLocaleTimeString() : 'Never'}
               </span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Weather Entities</span>
-              <span className="text-white">{weather.length}</span>
+              <span className="text-slate-800">{weather.length}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Calendar Entities</span>
-              <span className="text-white">{calendars.length}</span>
+              <span className="text-slate-800">{calendars.length}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Custom Names</span>
-              <span className="text-white">{customNames.size}</span>
+              <span className="text-slate-800">{customNames.size}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">Claude API</span>

@@ -44,28 +44,28 @@ function EditNameModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div className="glass-card p-6 w-full max-w-sm shadow-glass-lg">
-        <h3 className="text-lg font-semibold text-white mb-4 text-shadow">{title}</h3>
+        <h3 className="text-lg font-semibold text-slate-800 mb-4">{title}</h3>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full glass-panel border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          className="w-full glass-panel border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
           placeholder="Enter custom name"
           autoFocus
         />
         <div className="flex gap-3 mt-6">
           <button
             onClick={onCancel}
-            className="flex-1 py-3 glass-button text-white font-medium rounded-xl transition-all"
+            className="flex-1 py-3 glass-button text-slate-700 font-medium rounded-xl transition-all"
           >
             Cancel
           </button>
           {onReset && (
             <button
               onClick={onReset}
-              className="py-3 px-4 glass-button text-slate-300 font-medium rounded-xl transition-all"
+              className="py-3 px-4 glass-button text-slate-500 font-medium rounded-xl transition-all"
             >
               Reset
             </button>
@@ -247,13 +247,13 @@ export function RoomsView() {
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white text-shadow">Rooms</h2>
+        <h2 className="text-lg font-semibold text-slate-800">Rooms</h2>
         <button
           onClick={() => setEditMode(!editMode)}
           className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 ${
             editMode
               ? 'bg-gradient-to-r from-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-500/30'
-              : 'glass-button text-slate-300'
+              : 'glass-button text-slate-600'
           }`}
         >
           {editMode ? 'Done' : 'Edit'}
@@ -262,8 +262,8 @@ export function RoomsView() {
 
       {/* Edit mode hint */}
       {editMode && (
-        <div className="glass-card bg-blue-500/10 p-3 mb-4 glow-blue">
-          <p className="text-sm text-blue-300">
+        <div className="glass-card bg-blue-500/10 p-3 mb-4">
+          <p className="text-sm text-blue-600">
             Tap names to edit • Tap hide icons to hide rooms/devices
           </p>
         </div>
@@ -290,7 +290,7 @@ export function RoomsView() {
             <div className="flex items-center">
               <button
                 onClick={() => toggleRoom(areaName)}
-                className="flex-1 p-4 flex items-center justify-between hover:bg-white/5 transition-all duration-300"
+                className="flex-1 p-4 flex items-center justify-between hover:bg-slate-100 transition-all duration-300"
               >
                 <div className="flex items-center gap-3">
                   {/* Room icon */}
@@ -308,7 +308,7 @@ export function RoomsView() {
                           e.stopPropagation()
                           setEditingName({ id: roomId, defaultName: areaName, type: 'room' })
                         }}
-                        className="font-medium text-white hover:text-blue-400 transition-colors flex items-center gap-1"
+                        className="font-medium text-slate-800 hover:text-blue-500 transition-colors flex items-center gap-1"
                       >
                         {displayName}
                         <svg className="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -316,7 +316,7 @@ export function RoomsView() {
                         </svg>
                       </button>
                     ) : (
-                      <h3 className="font-medium text-white">{displayName}</h3>
+                      <h3 className="font-medium text-slate-800">{displayName}</h3>
                     )}
                     <div className="flex items-center gap-2 text-sm">
                       {(lightsOn + switchesOn) > 0 && (
@@ -362,7 +362,7 @@ export function RoomsView() {
               {editMode && (
                 <button
                   onClick={() => isHidden ? showRoom(roomId) : hideRoom(roomId)}
-                  className={`p-4 hover:bg-slate-700/50 transition-colors ${isHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                  className={`p-4 hover:bg-slate-100 transition-colors ${isHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                   title={isHidden ? 'Show room' : 'Hide room'}
                 >
                   {isHidden ? (
@@ -381,21 +381,21 @@ export function RoomsView() {
 
             {/* Expanded Content */}
             {isExpanded && hasDevices && (
-              <div className="px-4 pb-4 space-y-3 border-t border-white/5">
+              <div className="px-4 pb-4 space-y-3 border-t border-slate-200">
                 {/* Room controls */}
                 {lights.length > 0 && (
                   <div className="flex items-center justify-end gap-2 pt-3">
                     <button
                       onClick={(e) => { e.stopPropagation(); turnAllLightsOn(lights) }}
                       disabled={lightsOn === lights.length}
-                      className="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium bg-slate-200 hover:bg-slate-300 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-slate-700 transition-colors"
                     >
                       All On
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); turnAllLightsOff(lights) }}
                       disabled={lightsOn === 0}
-                      className="px-3 py-1.5 text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-white transition-colors"
+                      className="px-3 py-1.5 text-xs font-medium bg-slate-200 hover:bg-slate-300 disabled:opacity-30 disabled:cursor-not-allowed rounded-lg text-slate-700 transition-colors"
                     >
                       All Off
                     </button>
@@ -412,10 +412,10 @@ export function RoomsView() {
                       <div key={light.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(light.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <LightCard
@@ -439,10 +439,10 @@ export function RoomsView() {
                       <div key={sw.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(sw.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <SwitchCard
@@ -468,27 +468,27 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <button
                           onClick={() => setModalEntityRef({ type: 'climate', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            isActive ? 'bg-orange-500/20 border border-orange-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
+                            isActive ? 'bg-orange-500/15 border border-orange-500/30' : 'bg-slate-100 hover:bg-slate-200'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isActive ? 'bg-orange-500/30' : 'bg-slate-600'
+                              isActive ? 'bg-orange-500/20' : 'bg-slate-200'
                             }`}>
                               <span className="text-xl">🌡️</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className="text-sm text-slate-400">
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className="text-sm text-slate-500">
                                 {entity.state}
                                 {entity.attributes.current_temperature && ` • ${entity.attributes.current_temperature}°`}
                                 {entity.attributes.temperature && ` → ${entity.attributes.temperature}°`}
@@ -501,7 +501,7 @@ export function RoomsView() {
                                 e.stopPropagation()
                                 isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)
                               }}
-                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                 {isDeviceHidden ? (
@@ -527,27 +527,27 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <button
                           onClick={() => setModalEntityRef({ type: 'vacuum', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            isActive ? 'bg-green-500/20 border border-green-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
+                            isActive ? 'bg-green-500/15 border border-green-500/30' : 'bg-slate-100 hover:bg-slate-200'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isActive ? 'bg-green-500/30' : 'bg-slate-600'
+                              isActive ? 'bg-green-500/20' : 'bg-slate-200'
                             }`}>
                               <span className="text-xl">🤖</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className="text-sm text-slate-400">
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className="text-sm text-slate-500">
                                 {entity.state}
                                 {entity.attributes.battery_level !== undefined && ` • ${entity.attributes.battery_level}% battery`}
                               </p>
@@ -559,7 +559,7 @@ export function RoomsView() {
                                 e.stopPropagation()
                                 isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)
                               }}
-                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                 {isDeviceHidden ? (
@@ -585,27 +585,27 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <button
                           onClick={() => setModalEntityRef({ type: 'alarm', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            isArmed ? 'bg-red-500/20 border border-red-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
+                            isArmed ? 'bg-red-500/15 border border-red-500/30' : 'bg-slate-100 hover:bg-slate-200'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isArmed ? 'bg-red-500/30' : 'bg-slate-600'
+                              isArmed ? 'bg-red-500/20' : 'bg-slate-200'
                             }`}>
                               <span className="text-xl">🛡️</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className="text-sm text-slate-400">{entity.state.replace(/_/g, ' ')}</p>
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className="text-sm text-slate-500">{entity.state.replace(/_/g, ' ')}</p>
                             </div>
                           </div>
                           {editMode && (
@@ -614,7 +614,7 @@ export function RoomsView() {
                                 e.stopPropagation()
                                 isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)
                               }}
-                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                 {isDeviceHidden ? (
@@ -641,24 +641,24 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <div className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                          isOpen ? 'bg-blue-500/20 border border-blue-500/30' : 'bg-slate-700/50'
+                          isOpen ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-slate-100'
                         }`}>
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isOpen ? 'bg-blue-500/30' : 'bg-slate-600'
+                              isOpen ? 'bg-blue-500/20' : 'bg-slate-200'
                             }`}>
                               <span className="text-xl">💧</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className="text-sm text-slate-400">{isOpen ? 'Open' : 'Closed'}</p>
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className="text-sm text-slate-500">{isOpen ? 'Open' : 'Closed'}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -668,7 +668,7 @@ export function RoomsView() {
                               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                                 isOpen
                                   ? 'bg-blue-500 text-white hover:bg-blue-600'
-                                  : 'bg-slate-600 text-white hover:bg-slate-500'
+                                  : 'bg-slate-300 text-slate-700 hover:bg-slate-400'
                               } ${isLoading ? 'opacity-50' : ''}`}
                             >
                               {isLoading ? '...' : isOpen ? 'Close' : 'Open'}
@@ -676,7 +676,7 @@ export function RoomsView() {
                             {editMode && (
                               <button
                                 onClick={() => isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)}
-                                className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                                className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                               >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                   {isDeviceHidden ? (
@@ -703,27 +703,27 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <button
                           onClick={() => setModalEntityRef({ type: 'fan', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            isOn ? 'bg-cyan-500/20 border border-cyan-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
+                            isOn ? 'bg-cyan-500/15 border border-cyan-500/30' : 'bg-slate-100 hover:bg-slate-200'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isOn ? 'bg-cyan-500/30' : 'bg-slate-600'
+                              isOn ? 'bg-cyan-500/20' : 'bg-slate-200'
                             }`}>
                               <span className={`text-xl ${isOn ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }}>🌀</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className="text-sm text-slate-400">
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className="text-sm text-slate-500">
                                 {isOn ? 'On' : 'Off'}
                                 {isOn && entity.attributes.percentage !== undefined && ` • ${entity.attributes.percentage}%`}
                                 {isOn && entity.attributes.preset_mode && ` • ${entity.attributes.preset_mode}`}
@@ -736,7 +736,7 @@ export function RoomsView() {
                                 e.stopPropagation()
                                 isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)
                               }}
-                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                 {isDeviceHidden ? (
@@ -762,27 +762,27 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <button
                           onClick={() => setModalEntityRef({ type: 'lock', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            isLocked ? 'bg-green-500/20 border border-green-500/30' : 'bg-yellow-500/20 border border-yellow-500/30'
+                            isLocked ? 'bg-green-500/15 border border-green-500/30' : 'bg-yellow-500/15 border border-yellow-500/30'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isLocked ? 'bg-green-500/30' : 'bg-yellow-500/30'
+                              isLocked ? 'bg-green-500/20' : 'bg-yellow-500/20'
                             }`}>
                               <span className="text-xl">{isLocked ? '🔒' : '🔓'}</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className={`text-sm ${isLocked ? 'text-green-400' : 'text-yellow-400'}`}>
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className={`text-sm ${isLocked ? 'text-green-600' : 'text-yellow-600'}`}>
                                 {isLocked ? 'Locked' : 'Unlocked'}
                               </p>
                             </div>
@@ -793,7 +793,7 @@ export function RoomsView() {
                                 e.stopPropagation()
                                 isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)
                               }}
-                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                 {isDeviceHidden ? (
@@ -835,27 +835,27 @@ export function RoomsView() {
                       <div key={entity.entity_id} className="relative">
                         {editMode && isDeviceHidden && (
                           <div
-                            className="absolute inset-0 bg-slate-900/80 rounded-xl z-10 flex items-center justify-center cursor-pointer"
+                            className="absolute inset-0 bg-slate-100/90 rounded-xl z-10 flex items-center justify-center cursor-pointer"
                             onClick={() => showEntity(entity.entity_id)}
                           >
-                            <span className="text-sm text-slate-400">Hidden - tap to show</span>
+                            <span className="text-sm text-slate-500">Hidden - tap to show</span>
                           </div>
                         )}
                         <button
                           onClick={() => setModalEntityRef({ type: 'cover', entityId: entity.entity_id })}
                           className={`w-full p-4 rounded-xl flex items-center justify-between transition-all ${
-                            isOpen ? 'bg-purple-500/20 border border-purple-500/30' : 'bg-slate-700/50 hover:bg-slate-700'
+                            isOpen ? 'bg-blue-500/15 border border-blue-500/30' : 'bg-slate-100 hover:bg-slate-200'
                           }`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                              isOpen ? 'bg-purple-500/30' : 'bg-slate-600'
+                              isOpen ? 'bg-blue-500/20' : 'bg-slate-200'
                             }`}>
                               <span className={`text-xl ${isMoving ? 'animate-pulse' : ''}`}>{getIcon()}</span>
                             </div>
                             <div className="text-left">
-                              <p className="text-white font-medium">{deviceName}</p>
-                              <p className="text-sm text-slate-400">
+                              <p className="text-slate-800 font-medium">{deviceName}</p>
+                              <p className="text-sm text-slate-500">
                                 {isMoving ? entity.state.charAt(0).toUpperCase() + entity.state.slice(1) + '...' :
                                   position !== undefined ? `${position}% open` :
                                   isOpen ? 'Open' : 'Closed'}
@@ -868,7 +868,7 @@ export function RoomsView() {
                                 e.stopPropagation()
                                 isDeviceHidden ? showEntity(entity.entity_id) : hideEntity(entity.entity_id)
                               }}
-                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-400' : 'text-slate-400 hover:text-red-400'}`}
+                              className={`p-2 rounded-lg ${isDeviceHidden ? 'text-green-500' : 'text-slate-400 hover:text-red-400'}`}
                             >
                               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                                 {isDeviceHidden ? (
@@ -889,7 +889,7 @@ export function RoomsView() {
 
             {/* No devices message */}
             {isExpanded && !hasDevices && (
-              <div className="px-4 pb-4 pt-2 border-t border-slate-700/50">
+              <div className="px-4 pb-4 pt-2 border-t border-slate-200">
                 <p className="text-sm text-slate-500 text-center">No controllable devices</p>
               </div>
             )}

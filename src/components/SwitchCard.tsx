@@ -36,24 +36,22 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
 
   return (
     <div
-      className={`glass-card p-4 transition-all duration-300 ${
-        isOn ? 'glow-green' : ''
-      } ${isLoading ? 'opacity-75' : ''}`}
+      className={`glass-card p-4 transition-all duration-300 ${isLoading ? 'opacity-75' : ''}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className={`p-2.5 rounded-xl transition-all duration-300 ${
             isOn
-              ? 'bg-gradient-to-br from-green-400/30 to-emerald-500/20 shadow-inner-light'
+              ? 'bg-gradient-to-br from-green-400/25 to-emerald-500/15'
               : 'glass-panel'
           }`}>
-            <PowerIcon className={`w-5 h-5 transition-all duration-300 ${isOn ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'text-slate-500'}`} />
+            <PowerIcon className={`w-5 h-5 transition-all duration-300 ${isOn ? 'text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.4)]' : 'text-slate-400'}`} />
           </div>
           <div className="min-w-0">
             {onEditName ? (
               <button
                 onClick={onEditName}
-                className="font-medium text-white text-sm hover:text-blue-400 transition-colors flex items-start gap-1 text-left"
+                className="font-medium text-slate-800 text-sm hover:text-blue-600 transition-colors flex items-start gap-1 text-left"
               >
                 <span className="line-clamp-2 leading-tight">{friendlyName}</span>
                 <svg className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -61,9 +59,9 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
                 </svg>
               </button>
             ) : (
-              <h3 className="font-medium text-white text-sm line-clamp-2 leading-tight">{friendlyName}</h3>
+              <h3 className="font-medium text-slate-800 text-sm line-clamp-2 leading-tight">{friendlyName}</h3>
             )}
-            <p className="text-xs text-slate-400">{isOn ? 'On' : 'Off'}</p>
+            <p className="text-xs text-slate-500">{isOn ? 'On' : 'Off'}</p>
           </div>
         </div>
 
@@ -71,7 +69,7 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
           {onHide && (
             <button
               onClick={() => onHide(entity.entity_id)}
-              className="p-1.5 text-slate-600 hover:text-slate-400 transition-colors"
+              className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
               title="Hide"
             >
               <EyeSlashIcon className="w-4 h-4" />
@@ -82,7 +80,7 @@ export function SwitchCard({ entity, onHide, onEditName }: SwitchCardProps) {
             onClick={handleToggle}
             disabled={isLoading}
             className={`toggle-3d relative w-12 h-7 rounded-full transition-all duration-300 ${
-              isOn ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-slate-700'
+              isOn ? 'bg-gradient-to-r from-green-400 to-emerald-400' : 'bg-slate-300'
             } ${isLoading ? 'cursor-wait' : 'cursor-pointer'}`}
             role="switch"
             aria-checked={isOn}

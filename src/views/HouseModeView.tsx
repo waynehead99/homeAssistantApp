@@ -15,13 +15,13 @@ const HOUSE_MODES = [
 type ModeColor = typeof HOUSE_MODES[number]['color']
 
 const colorClasses: Record<ModeColor, { bg: string; border: string; text: string; activeBg: string }> = {
-  orange: { bg: 'bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-400', activeBg: 'bg-orange-500' },
-  yellow: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', text: 'text-yellow-400', activeBg: 'bg-yellow-500' },
-  purple: { bg: 'bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-400', activeBg: 'bg-purple-500' },
-  indigo: { bg: 'bg-indigo-500/20', border: 'border-indigo-500/30', text: 'text-indigo-400', activeBg: 'bg-indigo-500' },
-  blue: { bg: 'bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-400', activeBg: 'bg-blue-500' },
-  emerald: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-400', activeBg: 'bg-emerald-500' },
-  pink: { bg: 'bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-400', activeBg: 'bg-pink-500' },
+  orange: { bg: 'bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-600', activeBg: 'bg-orange-500' },
+  yellow: { bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', text: 'text-yellow-600', activeBg: 'bg-yellow-500' },
+  purple: { bg: 'bg-purple-500/20', border: 'border-purple-500/30', text: 'text-purple-600', activeBg: 'bg-purple-500' },
+  indigo: { bg: 'bg-indigo-500/20', border: 'border-indigo-500/30', text: 'text-indigo-600', activeBg: 'bg-indigo-500' },
+  blue: { bg: 'bg-blue-500/20', border: 'border-blue-500/30', text: 'text-blue-600', activeBg: 'bg-blue-500' },
+  emerald: { bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-600', activeBg: 'bg-emerald-500' },
+  pink: { bg: 'bg-pink-500/20', border: 'border-pink-500/30', text: 'text-pink-600', activeBg: 'bg-pink-500' },
 }
 
 function ModeIcon({ icon, className }: { icon: string; className?: string }) {
@@ -117,7 +117,7 @@ export function HouseModeView() {
     return (
       <div className="p-4 pb-24">
         <div className="glass-card p-6 text-center">
-          <p className="text-slate-400 text-shadow">House mode entity not found</p>
+          <p className="text-slate-700">House mode entity not found</p>
           <p className="text-sm text-slate-500 mt-2">Looking for: input_text.house_mode2</p>
         </div>
       </div>
@@ -131,8 +131,8 @@ export function HouseModeView() {
         currentModeConfig
           ? `${colorClasses[currentModeConfig.color].bg}`
           : ''
-      }`} style={currentModeConfig ? { boxShadow: `0 0 30px ${colorClasses[currentModeConfig.color].text.replace('text-', 'rgba(').replace('-400', ', 0.3)')}` } : {}}>
-        <div className="text-sm text-slate-400 mb-2">Current Mode</div>
+      }`}>
+        <div className="text-sm text-slate-500 mb-2">Current Mode</div>
         <div className="flex items-center gap-4">
           {currentModeConfig && (
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${colorClasses[currentModeConfig.color].activeBg} shadow-lg`}>
@@ -140,8 +140,8 @@ export function HouseModeView() {
             </div>
           )}
           <div>
-            <h2 className={`text-3xl font-semibold text-shadow ${
-              currentModeConfig ? colorClasses[currentModeConfig.color].text : 'text-white'
+            <h2 className={`text-3xl font-semibold ${
+              currentModeConfig ? colorClasses[currentModeConfig.color].text : 'text-slate-800'
             }`}>
               {currentMode}
             </h2>
@@ -152,7 +152,7 @@ export function HouseModeView() {
 
       {/* Mode Selection Grid */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-slate-400 px-1">Select Mode</h3>
+        <h3 className="text-sm font-medium text-slate-600 px-1">Select Mode</h3>
         <div className="grid grid-cols-2 gap-3">
           {HOUSE_MODES.map((mode) => {
             const isActive = currentMode === mode.id
@@ -166,18 +166,17 @@ export function HouseModeView() {
                 className={`glass-card flex flex-col items-center gap-3 p-5 transition-all duration-300 ${
                   isActive
                     ? `${colors.activeBg} text-white shadow-lg`
-                    : `hover:bg-white/5 ${colors.text}`
+                    : `hover:bg-slate-100 ${colors.text}`
                 } ${loading ? 'opacity-50 pointer-events-none' : ''} ${
                   isActive ? '' : 'active:scale-95'
                 }`}
-                style={isActive ? { boxShadow: `0 0 25px ${colors.text.replace('text-', 'rgba(').replace('-400', ', 0.4)')}` } : {}}
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                   isActive ? 'bg-white/20 shadow-inner' : `glass-panel ${colors.bg}`
                 }`}>
                   <ModeIcon icon={mode.icon} className={`w-6 h-6 ${isActive ? 'drop-shadow-lg' : ''}`} />
                 </div>
-                <span className={`text-sm font-medium ${isActive ? 'text-shadow' : ''}`}>{mode.label}</span>
+                <span className="text-sm font-medium">{mode.label}</span>
                 {isActive && (
                   <span className="text-xs opacity-75">Active</span>
                 )}

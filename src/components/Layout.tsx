@@ -91,23 +91,23 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 overflow-x-hidden">
-      {/* Gradient mesh background */}
-      <div className="fixed inset-0 bg-gradient-mesh pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50 overflow-x-hidden">
+      {/* Subtle gradient mesh background */}
+      <div className="fixed inset-0 bg-gradient-mesh pointer-events-none opacity-60" />
 
       {/* Header */}
       <header className="glass-card sticky top-0 z-20 rounded-none border-t-0 border-x-0">
         <div className="max-w-3xl mx-auto px-4 py-2">
           {/* Top row: Title, Weather, Connection */}
           <div className="flex items-center justify-between">
-            <h1 className="text-base font-semibold text-white">{title}</h1>
+            <h1 className="text-base font-semibold text-slate-800">{title}</h1>
 
             <div className="flex items-center gap-3">
               {/* Weather */}
               {primaryWeather && (
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">{getWeatherIcon(primaryWeather.attributes.condition)}</span>
-                  <span className="text-sm font-medium text-white">
+                  <span className="text-sm font-medium text-slate-700">
                     {Math.round(primaryWeather.attributes.temperature || 0)}°
                   </span>
                 </div>
@@ -118,10 +118,10 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
                 <div
                   className={`w-1.5 h-1.5 rounded-full ${
                     connectionStatus === 'connected'
-                      ? 'bg-green-400'
+                      ? 'bg-green-500'
                       : connectionStatus === 'connecting'
-                      ? 'bg-yellow-400 animate-pulse'
-                      : 'bg-red-400'
+                      ? 'bg-yellow-500 animate-pulse'
+                      : 'bg-red-500'
                   }`}
                 />
               </div>
@@ -129,7 +129,7 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
               {/* Refresh button */}
               <button
                 onClick={handleRefresh}
-                className="glass-button p-1.5 text-slate-400 hover:text-white rounded-lg"
+                className="glass-button p-1.5 text-slate-500 hover:text-slate-700 rounded-lg"
                 title="Refresh"
               >
                 <RefreshIcon className="w-4 h-4" />
@@ -147,12 +147,12 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
                 const location = formatLocation(person.state)
                 return (
                   <div key={person.entity_id} className="flex items-center gap-2 flex-shrink-0">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isHome ? 'bg-green-400 shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-slate-600'}`} />
+                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isHome ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.5)]' : 'bg-slate-400'}`} />
                     <div className="flex flex-col">
-                      <span className={`text-xs font-medium ${isHome ? 'text-slate-200' : 'text-slate-500'}`}>
+                      <span className={`text-xs font-medium ${isHome ? 'text-slate-700' : 'text-slate-500'}`}>
                         {name}
                       </span>
-                      <span className={`text-[10px] ${isHome ? 'text-green-400' : 'text-slate-500'}`}>
+                      <span className={`text-[10px] ${isHome ? 'text-green-600' : 'text-slate-400'}`}>
                         {location}
                       </span>
                     </div>
@@ -167,10 +167,10 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
               {lockSummary && (
                 <button
                   onClick={() => setModalEntity({ type: 'lock', entity: visibleLocks[0] })}
-                  className={`glass-button flex items-center gap-1 px-2.5 py-1.5 rounded-lg ${lockSummary.bgColor}`}
+                  className={`glass-button flex items-center gap-1 px-2.5 py-1.5 rounded-lg`}
                 >
                   <span className="text-xs">{lockSummary.icon}</span>
-                  <span className={`text-xs font-medium ${lockSummary.color}`}>{lockSummary.text}</span>
+                  <span className={`text-xs font-medium ${lockSummary.color.replace('-400', '-600')}`}>{lockSummary.text}</span>
                 </button>
               )}
 
@@ -178,10 +178,10 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
               {alarmStatus && primaryAlarm && (
                 <button
                   onClick={() => setModalEntity({ type: 'alarm', entity: primaryAlarm })}
-                  className={`glass-button flex items-center gap-1 px-2.5 py-1.5 rounded-lg ${alarmStatus.bgColor}`}
+                  className={`glass-button flex items-center gap-1 px-2.5 py-1.5 rounded-lg`}
                 >
                   <span className="text-xs">🛡️</span>
-                  <span className={`text-xs font-medium ${alarmStatus.color}`}>{alarmStatus.text}</span>
+                  <span className={`text-xs font-medium ${alarmStatus.color.replace('-400', '-600').replace('-500', '-600')}`}>{alarmStatus.text}</span>
                 </button>
               )}
             </div>
@@ -209,8 +209,8 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
             />
             {/* Show all locks if there are multiple */}
             {visibleLocks.length > 1 && (
-              <div className="mt-6 pt-4 border-t border-white/5">
-                <h4 className="text-sm font-medium text-slate-400 mb-3">All Locks</h4>
+              <div className="mt-6 pt-4 border-t border-slate-200">
+                <h4 className="text-sm font-medium text-slate-600 mb-3">All Locks</h4>
                 <div className="space-y-2">
                   {visibleLocks.map(lock => {
                     const name = getDisplayName(
@@ -226,16 +226,16 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
                         onClick={() => setModalEntity({ type: 'lock', entity: lock })}
                         className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${
                           isSelected
-                            ? 'glass-panel ring-1 ring-blue-400/30 glow-blue'
-                            : 'glass-panel hover:bg-white/5'
+                            ? 'glass-panel ring-1 ring-blue-400/50 glow-blue'
+                            : 'glass-panel hover:bg-slate-100'
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-lg">{isJammed ? '⚠️' : isLocked ? '🔒' : '🔓'}</span>
-                          <span className="text-sm text-white">{name}</span>
+                          <span className="text-sm text-slate-700">{name}</span>
                         </div>
                         <span className={`text-xs font-medium ${
-                          isJammed ? 'text-red-400' : isLocked ? 'text-green-400' : 'text-yellow-400'
+                          isJammed ? 'text-red-600' : isLocked ? 'text-green-600' : 'text-yellow-600'
                         }`}>
                           {isJammed ? 'Jammed' : isLocked ? 'Locked' : 'Unlocked'}
                         </span>

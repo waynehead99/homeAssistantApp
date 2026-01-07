@@ -88,12 +88,12 @@ function DetailCard({ icon, label, value, unit }: { icon: React.ReactNode; label
 
   return (
     <div className="glass-panel p-3">
-      <div className="flex items-center gap-2 text-slate-400 mb-1">
+      <div className="flex items-center gap-2 text-slate-500 mb-1">
         {icon}
         <span className="text-xs">{label}</span>
       </div>
-      <p className="text-white font-medium text-shadow">
-        {value}{unit && <span className="text-slate-400 text-sm ml-1">{unit}</span>}
+      <p className="text-slate-800 font-medium">
+        {value}{unit && <span className="text-slate-500 text-sm ml-1">{unit}</span>}
       </p>
     </div>
   )
@@ -116,12 +116,12 @@ export function WeatherView() {
 
   if (!primaryWeather) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+      <div className="flex flex-col items-center justify-center h-64 text-slate-500">
         <div className="glass-card p-8 text-center">
           <svg className="w-16 h-16 mb-4 mx-auto opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
           </svg>
-          <p className="text-shadow">No weather data available</p>
+          <p className="text-slate-700">No weather data available</p>
           <p className="text-sm text-slate-500 mt-1">Select a weather source in Settings</p>
         </div>
       </div>
@@ -133,29 +133,29 @@ export function WeatherView() {
   return (
     <div className="space-y-4 pb-20">
       {/* Current Weather - Hero Card */}
-      <div className="glass-card bg-gradient-to-br from-blue-600/30 to-cyan-500/20 p-6 glow-blue">
+      <div className="glass-card bg-gradient-to-br from-blue-500/15 to-cyan-500/10 p-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-blue-300 text-sm mb-1">
+            <p className="text-blue-600 text-sm mb-1">
               {primaryWeather.attributes.friendly_name || 'Current Weather'}
             </p>
             <div className="flex items-baseline gap-2">
-              <span className="text-6xl font-light text-white text-shadow-lg">
+              <span className="text-6xl font-light text-slate-800">
                 {Math.round(attributes.temperature || 0)}°
               </span>
             </div>
             {attributes.condition && attributes.condition !== 'unknown' && (
-              <p className="text-xl text-white mt-2 capitalize text-shadow">
+              <p className="text-xl text-slate-700 mt-2 capitalize">
                 {attributes.condition.replace(/-/g, ' ')}
               </p>
             )}
             {feelsLike !== undefined && !isNaN(feelsLike) && (
-              <p className="text-sm text-blue-200 mt-1">
+              <p className="text-sm text-blue-600 mt-1">
                 Feels like {Math.round(feelsLike)}°
               </p>
             )}
           </div>
-          <div className="text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+          <div className="text-blue-500">
             <WeatherIcon condition={attributes.condition} className="w-24 h-24" />
           </div>
         </div>
@@ -225,30 +225,30 @@ export function WeatherView() {
       {/* Sun Times (if available) */}
       {(attributes.next_dawn || attributes.next_rising || attributes.next_setting || attributes.next_dusk) && (
         <div className="glass-card p-4">
-          <h3 className="text-sm font-medium text-slate-400 mb-3">Sun</h3>
+          <h3 className="text-sm font-medium text-slate-600 mb-3">Sun</h3>
           <div className="grid grid-cols-4 gap-2 text-center">
             {attributes.next_dawn && (
               <div className="glass-panel p-2 rounded-lg">
                 <p className="text-xs text-slate-500">Dawn</p>
-                <p className="text-sm text-white text-shadow">{new Date(attributes.next_dawn).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
+                <p className="text-sm text-slate-700">{new Date(attributes.next_dawn).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
               </div>
             )}
             {attributes.next_rising && (
               <div className="glass-panel p-2 rounded-lg">
                 <p className="text-xs text-slate-500">Sunrise</p>
-                <p className="text-sm text-yellow-400 text-shadow">{new Date(attributes.next_rising).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
+                <p className="text-sm text-yellow-600">{new Date(attributes.next_rising).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
               </div>
             )}
             {attributes.next_setting && (
               <div className="glass-panel p-2 rounded-lg">
                 <p className="text-xs text-slate-500">Sunset</p>
-                <p className="text-sm text-orange-400 text-shadow">{new Date(attributes.next_setting).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
+                <p className="text-sm text-orange-600">{new Date(attributes.next_setting).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
               </div>
             )}
             {attributes.next_dusk && (
               <div className="glass-panel p-2 rounded-lg">
                 <p className="text-xs text-slate-500">Dusk</p>
-                <p className="text-sm text-white text-shadow">{new Date(attributes.next_dusk).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
+                <p className="text-sm text-slate-700">{new Date(attributes.next_dusk).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</p>
               </div>
             )}
           </div>

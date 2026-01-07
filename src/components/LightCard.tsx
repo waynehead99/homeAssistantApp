@@ -92,20 +92,18 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
 
   return (
     <div
-      className={`glass-card p-4 transition-all duration-300 ${
-        isOn ? 'glow-yellow' : ''
-      } ${isLoading ? 'opacity-75' : ''}`}
+      className={`glass-card p-4 transition-all duration-300 ${isLoading ? 'opacity-75' : ''}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className={`p-2.5 rounded-xl transition-all duration-300 ${
             isOn
-              ? 'bg-gradient-to-br from-yellow-400/30 to-amber-500/20 shadow-inner-light'
+              ? 'bg-gradient-to-br from-yellow-400/25 to-amber-500/15'
               : 'glass-panel'
           }`}>
             <LightBulbIcon
-              className={`w-5 h-5 transition-all duration-300 ${isOn ? 'text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]' : 'text-slate-500'}`}
+              className={`w-5 h-5 transition-all duration-300 ${isOn ? 'text-amber-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]' : 'text-slate-400'}`}
               filled={isOn}
             />
           </div>
@@ -113,7 +111,7 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
             {onEditName ? (
               <button
                 onClick={onEditName}
-                className="font-medium text-white text-sm hover:text-blue-400 transition-colors flex items-start gap-1 text-left"
+                className="font-medium text-slate-800 text-sm hover:text-blue-600 transition-colors flex items-start gap-1 text-left"
               >
                 <span className="line-clamp-2 leading-tight">{friendlyName}</span>
                 <svg className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -121,9 +119,9 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
                 </svg>
               </button>
             ) : (
-              <h3 className="font-medium text-white text-sm line-clamp-2 leading-tight">{friendlyName}</h3>
+              <h3 className="font-medium text-slate-800 text-sm line-clamp-2 leading-tight">{friendlyName}</h3>
             )}
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500">
               {isOn ? (supportsBrightness ? `${localBrightness}%` : 'On') : 'Off'}
             </p>
           </div>
@@ -133,7 +131,7 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
           {onHide && (
             <button
               onClick={() => onHide(light.entity_id)}
-              className="p-1.5 text-slate-600 hover:text-slate-400 transition-colors"
+              className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
               title="Hide"
             >
               <EyeSlashIcon className="w-4 h-4" />
@@ -144,7 +142,7 @@ export function LightCard({ light, onHide, onEditName }: LightCardProps) {
             onClick={handleToggle}
             disabled={isLoading}
             className={`toggle-3d relative w-12 h-7 rounded-full transition-all duration-300 ${
-              isOn ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-slate-700'
+              isOn ? 'bg-gradient-to-r from-yellow-400 to-amber-400' : 'bg-slate-300'
             } ${isLoading ? 'cursor-wait' : 'cursor-pointer'}`}
             role="switch"
             aria-checked={isOn}

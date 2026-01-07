@@ -8,12 +8,12 @@ interface VacuumControlsProps {
 }
 
 const STATE_INFO: Record<string, { label: string; color: string }> = {
-  cleaning: { label: 'Cleaning', color: 'text-green-400' },
-  docked: { label: 'Docked', color: 'text-blue-400' },
-  idle: { label: 'Idle', color: 'text-slate-400' },
-  paused: { label: 'Paused', color: 'text-yellow-400' },
-  returning: { label: 'Returning', color: 'text-purple-400' },
-  error: { label: 'Error', color: 'text-red-400' },
+  cleaning: { label: 'Cleaning', color: 'text-green-600' },
+  docked: { label: 'Docked', color: 'text-blue-600' },
+  idle: { label: 'Idle', color: 'text-slate-500' },
+  paused: { label: 'Paused', color: 'text-yellow-600' },
+  returning: { label: 'Returning', color: 'text-purple-600' },
+  error: { label: 'Error', color: 'text-red-600' },
 }
 
 export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
@@ -78,10 +78,10 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
   }
 
   const getBatteryColor = () => {
-    if (!battery) return 'text-slate-400'
-    if (battery <= 20) return 'text-red-400'
-    if (battery <= 50) return 'text-yellow-400'
-    return 'text-green-400'
+    if (!battery) return 'text-slate-500'
+    if (battery <= 20) return 'text-red-600'
+    if (battery <= 50) return 'text-yellow-600'
+    return 'text-green-600'
   }
 
   return (
@@ -91,18 +91,18 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
         {/* Vacuum Icon */}
         <div className={`inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-3 transition-all duration-300 ${
           isCleaning
-            ? 'bg-gradient-to-br from-green-400/30 to-emerald-500/20 glow-green'
+            ? 'bg-gradient-to-br from-green-400/30 to-emerald-500/20'
             : 'glass-panel'
         }`}>
           <svg className={`w-10 h-10 ${stateInfo.color} ${isCleaning ? 'animate-pulse' : ''}`} viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5.5-2.5l7.51-3.49L17.5 6.5 9.99 9.99 6.5 17.5zm5.5-6.6c.61 0 1.1.49 1.1 1.1s-.49 1.1-1.1 1.1-1.1-.49-1.1-1.1.49-1.1 1.1-1.1z" />
           </svg>
         </div>
-        <div className={`text-xl font-medium ${stateInfo.color} text-shadow`}>
+        <div className={`text-xl font-medium ${stateInfo.color}`}>
           {stateInfo.label}
         </div>
         {status && status !== currentState && (
-          <div className="text-sm text-slate-400 mt-1">{status}</div>
+          <div className="text-sm text-slate-500 mt-1">{status}</div>
         )}
       </div>
 
@@ -110,9 +110,9 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
       {battery !== undefined && (
         <div className="glass-panel p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-400">Battery</span>
+            <span className="text-sm text-slate-500">Battery</span>
             <div className="flex items-center gap-2">
-              <div className="w-24 h-2 bg-slate-700 rounded-full overflow-hidden shadow-inner">
+              <div className="w-24 h-2 bg-slate-200 rounded-full overflow-hidden shadow-inner">
                 <div
                   className={`h-full rounded-full transition-all duration-500 ${
                     battery <= 20 ? 'bg-gradient-to-r from-red-500 to-red-400' : battery <= 50 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-green-500 to-emerald-400'
@@ -192,8 +192,8 @@ export function VacuumControls({ entity, onUpdate }: VacuumControlsProps) {
                 onClick={() => handleFanSpeed(speed)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                   fanSpeed === speed
-                    ? 'bg-purple-400/20 text-purple-400 ring-1 ring-purple-400/50 glow-purple'
-                    : 'glass-panel text-slate-300 hover:bg-white/5'
+                    ? 'bg-purple-400/20 text-purple-600 ring-1 ring-purple-400/50'
+                    : 'glass-panel text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 {speed.charAt(0).toUpperCase() + speed.slice(1)}

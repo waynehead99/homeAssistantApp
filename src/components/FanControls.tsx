@@ -170,15 +170,15 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
           <div className="flex items-center gap-3">
             {/* Fan Icon */}
             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-              isOn ? 'bg-blue-500/20 text-blue-400' : 'bg-slate-600/50 text-slate-500'
+              isOn ? 'bg-blue-500/20 text-blue-500' : 'bg-slate-200 text-slate-400'
             }`}>
               <svg className={`w-6 h-6 ${isOn ? 'animate-spin' : ''}`} style={{ animationDuration: '2s' }} viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 11c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 2c0-3.31-2.69-6-6-6V3L6 9l6 6v-4c2.21 0 4 1.79 4 4h4zm-12 0c0 3.31 2.69 6 6 6v4l6-6-6-6v4c-2.21 0-4-1.79-4-4H6z"/>
               </svg>
             </div>
             <div>
-              <div className="text-white font-medium">Power</div>
-              <div className="text-sm text-slate-400">
+              <div className="text-slate-800 font-medium">Power</div>
+              <div className="text-sm text-slate-500">
                 {isOn ? `${getSpeedLabel()} - ${percentage}%` : 'Off'}
               </div>
             </div>
@@ -187,7 +187,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
           <button
             onClick={handleToggle}
             className={`relative w-14 h-8 rounded-full transition-colors ${
-              isOn ? 'bg-blue-500' : 'bg-slate-600'
+              isOn ? 'bg-blue-500' : 'bg-slate-300'
             }`}
           >
             <div
@@ -202,9 +202,9 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
       {/* Speed Slider */}
       {supportsSpeed && isOn && (
         <div className="glass-panel p-4">
-          <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Speed</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">Speed</div>
           <div className="flex items-center gap-4">
-            <span className="text-slate-500 text-sm w-8">0%</span>
+            <span className="text-slate-400 text-sm w-8">0%</span>
             <input
               type="range"
               min={0}
@@ -216,16 +216,16 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
               onTouchEnd={handleSpeedCommit}
               className="slider-3d flex-1"
             />
-            <span className="text-slate-500 text-sm w-12 text-right">100%</span>
+            <span className="text-slate-400 text-sm w-12 text-right">100%</span>
           </div>
-          <div className="text-center text-sm text-white mt-2">{localPercentage}%</div>
+          <div className="text-center text-sm text-slate-700 mt-2">{localPercentage}%</div>
         </div>
       )}
 
       {/* Preset Modes */}
       {supportsPresetMode && (
         <div>
-          <div className="text-xs text-slate-400 uppercase tracking-wide mb-3">Preset Mode</div>
+          <div className="text-xs text-slate-500 uppercase tracking-wide mb-3">Preset Mode</div>
           <div className="grid grid-cols-3 gap-2">
             {presetModes.map((mode) => {
               const isActive = presetMode === mode
@@ -235,8 +235,8 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
                   onClick={() => handlePresetMode(mode)}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-all duration-300 ${
                     isActive
-                      ? 'bg-blue-400/20 text-blue-400 ring-1 ring-blue-400/30 glow-blue'
-                      : 'glass-panel text-slate-400 hover:bg-white/5'
+                      ? 'bg-blue-500/15 text-blue-600 ring-1 ring-blue-400/40 glow-blue'
+                      : 'glass-panel text-slate-500 hover:bg-slate-100'
                   }`}
                 >
                   <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
@@ -261,8 +261,8 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
               onClick={handleOscillate}
               className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all duration-300 ${
                 oscillating
-                  ? 'bg-green-400/20 text-green-400 ring-1 ring-green-400/30 glow-green'
-                  : 'glass-panel text-slate-400 hover:bg-white/5'
+                  ? 'bg-green-500/15 text-green-600 ring-1 ring-green-400/40 glow-green'
+                  : 'glass-panel text-slate-500 hover:bg-slate-100'
               }`}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -278,8 +278,8 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
               onClick={handleDirection}
               className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl transition-all duration-300 ${
                 direction === 'reverse'
-                  ? 'bg-purple-400/20 text-purple-400 ring-1 ring-purple-400/30 glow-purple'
-                  : 'glass-panel text-slate-400 hover:bg-white/5'
+                  ? 'bg-purple-500/15 text-purple-600 ring-1 ring-purple-400/40 glow-purple'
+                  : 'glass-panel text-slate-500 hover:bg-slate-100'
               }`}
             >
               <svg
@@ -298,7 +298,7 @@ export function FanControls({ entity, onUpdate }: FanControlsProps) {
       )}
 
       {/* Entity Info */}
-      <div className="text-xs text-slate-500 text-center">
+      <div className="text-xs text-slate-400 text-center">
         {entity.attributes.friendly_name || entity.entity_id}
       </div>
     </div>
