@@ -27,6 +27,8 @@ export interface HomeContext {
   people: Array<{ name: string; state: string; latitude?: number; longitude?: number }>
   lightsOn: number
   totalLights: number
+  // Detailed lights list for chat/control
+  lights: Array<{ entityId: string; name: string; state: string; brightness?: number; area?: string }>
   climate: Array<{ name: string; state: string; currentTemp?: number; targetTemp?: number }>
   vacuums: Array<{ name: string; state: string; battery?: number }>
   alarm: { name: string; state: string } | null
@@ -440,4 +442,204 @@ export async function generateHomeInsights(context: HomeContext): Promise<string
 // Check if Claude API is configured
 export function isClaudeConfigured(): boolean {
   return Boolean(CLAUDE_API_KEY)
+}
+
+// Chat message type
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
+// Build the home context string for chat (includes detailed lights list)
+export function buildHomeContextString(context: HomeContext): string {
+  let contextStr = buildPrompt(context).split('\n\n').slice(0, -1).join('\n\n') // Remove the instruction part
+
+  // Add detailed lights list for chat interactions
+  if (context.lights && context.lights.length > 0) {
+    contextStr += '\n\nDetailed Lights List:\n'
+    // Group by area if available
+    const byArea = new Map<string, typeof context.lights>()
+    for (const light of context.lights) {
+      const area = light.area || 'Other'
+      if (!byArea.has(area)) byArea.set(area, [])
+      byArea.get(area)!.push(light)
+    }
+
+    for (const [area, lights] of byArea) {
+      contextStr += `${area}:\n`
+      for (const light of lights) {
+        const brightnessStr = light.brightness !== undefined ? ` (${light.brightness}%)` : ''
+        contextStr += `  - ${light.name} [${light.entityId}]: ${light.state}${brightnessStr}\n`
+      }
+    }
+  }
+
+  return contextStr
+}
+
+// Light control callback type
+export type LightControlCallback = (entityId: string, action: 'turn_on' | 'turn_off', brightness?: number) => Promise<boolean>
+
+// Tool definitions for home control
+const homeControlTools = [
+  {
+    name: 'control_light',
+    description: 'Turn a light on or off, optionally setting brightness. Use the entity_id from the lights list.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        entity_id: {
+          type: 'string',
+          description: 'The entity_id of the light (e.g., light.basement_lights)'
+        },
+        action: {
+          type: 'string',
+          enum: ['turn_on', 'turn_off'],
+          description: 'Whether to turn the light on or off'
+        },
+        brightness: {
+          type: 'number',
+          description: 'Optional brightness percentage (0-100). Only used when turning on.',
+          minimum: 0,
+          maximum: 100
+        }
+      },
+      required: ['entity_id', 'action']
+    }
+  }
+]
+
+// Continue a conversation about the home (with optional light control)
+export async function chatAboutHome(
+  homeContext: string,
+  messages: ChatMessage[],
+  newMessage: string,
+  onLightControl?: LightControlCallback
+): Promise<string> {
+  if (!CLAUDE_API_KEY) {
+    return 'AI chat unavailable. Add VITE_CLAUDE_API_KEY to your .env file.'
+  }
+
+  const canControlLights = !!onLightControl
+  const systemPrompt = `You are a helpful home assistant AI. You have access to the current state of the user's smart home. Answer questions about their home, provide helpful suggestions, and give detailed information when asked.
+
+Current Home State:
+${homeContext}
+
+Guidelines:
+- Be helpful, friendly, and conversational
+- When asked about specific sensors or devices, provide details from the home state
+- If asked about something not in the data, say you don't have that information
+- Keep responses concise but informative (2-4 sentences unless more detail is requested)
+- You can reference weather, calendar events, device states, and sensor readings
+${canControlLights ? `- You CAN control lights using the control_light tool. When the user asks to turn lights on/off, use the tool with the correct entity_id from the Detailed Lights List.
+- Match light names flexibly - "basement lights" matches "Basement Lights", "living room" matches lights in the Living Room area, etc.
+- After controlling a light, confirm what you did.` : '- Light control is not currently available.'}`
+
+  try {
+    // Build the message history
+    const apiMessages = [
+      ...messages.map(m => ({ role: m.role, content: m.content })),
+      { role: 'user' as const, content: newMessage }
+    ]
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const requestBody: any = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      system: systemPrompt,
+      messages: apiMessages,
+    }
+
+    // Add tools if light control is available
+    if (canControlLights) {
+      requestBody.tools = homeControlTools
+    }
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify(requestBody),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      console.error('Claude API error:', response.status, error)
+      if (response.status === 429) {
+        return 'I\'m receiving too many requests right now. Please try again in a moment.'
+      }
+      return 'Sorry, I encountered an error. Please try again.'
+    }
+
+    const data = await response.json()
+
+    // Check if Claude wants to use a tool
+    if (data.stop_reason === 'tool_use' && canControlLights) {
+      const toolUseBlock = data.content?.find((block: { type: string }) => block.type === 'tool_use')
+
+      if (toolUseBlock && toolUseBlock.name === 'control_light') {
+        const { entity_id, action, brightness } = toolUseBlock.input
+        console.log('AI requesting light control:', { entity_id, action, brightness })
+
+        // Execute the light control
+        const success = await onLightControl(entity_id, action, brightness)
+
+        // Send the tool result back to Claude for a natural response
+        const toolResultMessages = [
+          ...apiMessages,
+          { role: 'assistant' as const, content: data.content },
+          {
+            role: 'user' as const,
+            content: [{
+              type: 'tool_result',
+              tool_use_id: toolUseBlock.id,
+              content: success
+                ? `Successfully ${action === 'turn_on' ? 'turned on' : 'turned off'} ${entity_id}${brightness ? ` at ${brightness}% brightness` : ''}`
+                : `Failed to ${action === 'turn_on' ? 'turn on' : 'turn off'} ${entity_id}`
+            }]
+          }
+        ]
+
+        // Get Claude's final response
+        const followUpResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': CLAUDE_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 500,
+            system: systemPrompt,
+            messages: toolResultMessages,
+          }),
+        })
+
+        if (followUpResponse.ok) {
+          const followUpData = await followUpResponse.json()
+          const textBlock = followUpData.content?.find((block: { type: string }) => block.type === 'text')
+          return textBlock?.text?.trim() || (success ? 'Done!' : 'Sorry, I couldn\'t control that light.')
+        }
+
+        // Fallback response if follow-up fails
+        return success
+          ? `I've ${action === 'turn_on' ? 'turned on' : 'turned off'} the ${entity_id.split('.')[1].replace(/_/g, ' ')}.`
+          : 'Sorry, I wasn\'t able to control that light.'
+      }
+    }
+
+    // Regular text response
+    const textBlock = data.content?.find((block: { type: string }) => block.type === 'text')
+    return textBlock?.text?.trim() || 'I\'m not sure how to respond to that.'
+  } catch (error) {
+    console.error('Claude chat error:', error)
+    return 'Sorry, I\'m having trouble connecting right now. Please try again.'
+  }
 }

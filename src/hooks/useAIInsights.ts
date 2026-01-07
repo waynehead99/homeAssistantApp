@@ -6,10 +6,15 @@ import {
   getWeatherForEventTime,
   geocodeAddress,
   estimateTravelTime,
-  type HomeContext
+  chatAboutHome,
+  buildHomeContextString,
+  type HomeContext,
+  type ChatMessage,
+  type LightControlCallback
 } from '../services/claude'
+export type { ChatMessage }
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
-import { calendarService } from '../services/homeAssistant'
+import { calendarService, sendNotification, lightService } from '../services/homeAssistant'
 import { shouldShowBinarySensor } from '../utils/sensorFilters'
 import type { CalendarEvent } from '../types/homeAssistant'
 
@@ -20,10 +25,14 @@ const CACHE_DURATION = 5 * 60 * 1000
 let cachedInsight: string | null = null
 let lastGeneratedTime = 0
 
+// Module-level cache for home context (for chat)
+let cachedHomeContext: string | null = null
+
 export function useAIInsights() {
   const [insight, setInsight] = useState<string | null>(cachedInsight)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [homeContext, setHomeContext] = useState<string | null>(cachedHomeContext)
 
   const {
     sensors,
@@ -41,6 +50,7 @@ export function useAIInsights() {
     hiddenEntities,
     hiddenRooms,
     entityAreaMap,
+    areas,
     settings,
   } = useHomeAssistantContext()
 
@@ -256,6 +266,19 @@ export function useAIInsights() {
       const lightsOn = visibleLights.filter(l => l.state === 'on').length
       const totalLights = visibleLights.length
 
+      // Build detailed lights list for chat
+      const areaNameMap = new Map(areas.map(a => [a.area_id, a.name]))
+      const lightsData = visibleLights.map(l => {
+        const areaId = entityAreaMap.get(l.entity_id)
+        return {
+          entityId: l.entity_id,
+          name: l.attributes.friendly_name || l.entity_id.split('.')[1].replace(/_/g, ' '),
+          state: l.state,
+          brightness: l.state === 'on' ? l.attributes.brightness ? Math.round((l.attributes.brightness / 255) * 100) : undefined : undefined,
+          area: areaId ? areaNameMap.get(areaId) : undefined,
+        }
+      })
+
       // Gather climate/HVAC data
       const climateData = visibleClimate.map(c => ({
         name: c.attributes.friendly_name || c.entity_id.split('.')[1].replace(/_/g, ' '),
@@ -302,9 +325,16 @@ export function useAIInsights() {
       const LOW_BATTERY_THRESHOLD = 20
       const lowBatteryDevices = sensors
         .filter(s => {
+          const entityId = s.entity_id.toLowerCase()
           const isBattery = s.attributes.device_class === 'battery' ||
-            s.entity_id.toLowerCase().includes('battery')
+            entityId.includes('battery')
           if (!isBattery) return false
+
+          // Exclude voltage sensors (not SOC/percentage)
+          if (entityId.includes('voltage') || s.attributes.unit_of_measurement === 'V') {
+            return false
+          }
+
           const level = parseFloat(s.state)
           return !isNaN(level) && level <= LOW_BATTERY_THRESHOLD && level > 0
         })
@@ -351,6 +381,7 @@ export function useAIInsights() {
         people: peopleStatus,
         lightsOn,
         totalLights,
+        lights: lightsData,
         climate: climateData,
         vacuums: vacuumData,
         alarm: alarmData,
@@ -372,6 +403,11 @@ export function useAIInsights() {
       setInsight(result)
       cachedInsight = result
       lastGeneratedTime = now
+
+      // Cache the home context for chat
+      const contextString = buildHomeContextString(context)
+      setHomeContext(contextString)
+      cachedHomeContext = contextString
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to generate insight'
       setError(message)
@@ -379,11 +415,75 @@ export function useAIInsights() {
     } finally {
       setLoading(false)
     }
-  }, [visibleBinarySensors, visibleLights, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, weather, calendars, filteredPeople, settings, sensors, binarySensors])
+  }, [visibleBinarySensors, visibleLights, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, weather, calendars, filteredPeople, settings, sensors, binarySensors, areas, entityAreaMap])
 
   const refresh = useCallback(() => {
     generateInsight(true)
   }, [generateInsight])
+
+  // Send the current insight as a notification
+  const sendInsightNotification = useCallback(async () => {
+    const recipients = settings.notificationRecipients || []
+    if (recipients.length === 0) {
+      console.warn('No notification recipients configured')
+      return false
+    }
+
+    if (!insight) {
+      console.warn('No insight to send')
+      return false
+    }
+
+    try {
+      await sendNotification(
+        recipients,
+        '🏠 Home Insight',
+        insight,
+        {
+          tag: 'ai-insight',
+          group: 'home-dashboard',
+        }
+      )
+      return true
+    } catch (error) {
+      console.error('Failed to send insight notification:', error)
+      return false
+    }
+  }, [insight, settings.notificationRecipients])
+
+  // Light control callback for AI chat
+  const handleLightControl: LightControlCallback = useCallback(async (
+    entityId: string,
+    action: 'turn_on' | 'turn_off',
+    brightness?: number
+  ): Promise<boolean> => {
+    try {
+      if (action === 'turn_on') {
+        if (brightness !== undefined) {
+          await lightService.setBrightness(entityId, brightness)
+        } else {
+          await lightService.turnOn(entityId)
+        }
+      } else {
+        await lightService.turnOff(entityId)
+      }
+      return true
+    } catch (error) {
+      console.error('Failed to control light:', error)
+      return false
+    }
+  }, [])
+
+  // Chat with AI about the home
+  const sendChatMessage = useCallback(async (
+    messages: ChatMessage[],
+    newMessage: string
+  ): Promise<string> => {
+    if (!homeContext) {
+      return 'Home context not available. Please refresh insights first.'
+    }
+    return chatAboutHome(homeContext, messages, newMessage, handleLightControl)
+  }, [homeContext, handleLightControl])
 
   return {
     insight,
@@ -391,6 +491,9 @@ export function useAIInsights() {
     error,
     generateInsight,
     refresh,
+    sendInsightNotification,
     isConfigured: isClaudeConfigured(),
+    homeContext,
+    sendChatMessage,
   }
 }

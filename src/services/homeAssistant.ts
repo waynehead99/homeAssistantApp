@@ -212,6 +212,29 @@ export async function callService(
   return result
 }
 
+// Send notification to mobile app devices
+export async function sendNotification(
+  recipients: string[],
+  title: string,
+  message: string,
+  data?: { [key: string]: unknown }
+): Promise<void> {
+  for (const recipient of recipients) {
+    try {
+      await apiFetch(`/api/services/notify/mobile_app_${recipient}`, {
+        method: 'POST',
+        body: JSON.stringify({
+          title,
+          message,
+          data,
+        }),
+      })
+    } catch (error) {
+      console.error(`Failed to send notification to ${recipient}:`, error)
+    }
+  }
+}
+
 // Light-specific service calls
 export const lightService = {
   turnOn: (entityId: string, brightness?: number) =>

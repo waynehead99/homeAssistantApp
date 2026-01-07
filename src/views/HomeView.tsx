@@ -11,6 +11,7 @@ import { LockControls } from '../components/LockControls'
 import { CoverControls } from '../components/CoverControls'
 import { AutomationToggle } from '../components/AutomationToggle'
 import { RelatedEntitiesSection } from '../components/RelatedEntitiesSection'
+import { AIInsightChat } from '../components/AIInsightChat'
 
 // Store only entity_id and type, look up actual entity from context for real-time updates
 type ModalEntityRef =
@@ -24,9 +25,10 @@ type ModalEntityRef =
 
 export function HomeView() {
   const { lights, switches, climate, vacuums, alarms, valves, fans, locks, covers, automations, scripts, settings, updateEntity, getDisplayName } = useHomeAssistantContext()
-  const { insight, loading, generateInsight, refresh: refreshInsight, isConfigured } = useAIInsights()
+  const { insight, loading, generateInsight, refresh: refreshInsight, sendInsightNotification, isConfigured, sendChatMessage } = useAIInsights()
   const [loadingEntities, setLoadingEntities] = useState<Set<string>>(new Set())
   const [modalEntityRef, setModalEntityRef] = useState<ModalEntityRef>(null)
+  const [isChatOpen, setIsChatOpen] = useState(false)
   const insightLoadedRef = useRef(false)
 
   // Look up the actual entity from context - this updates when context updates
@@ -187,15 +189,45 @@ export function HomeView() {
               </div>
               <h3 className="font-medium text-blue-700">AI Insights</h3>
             </div>
-            <button
-              onClick={refreshInsight}
-              disabled={loading}
-              className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
-            >
-              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Chat button */}
+              {insight && (
+                <button
+                  onClick={() => setIsChatOpen(true)}
+                  disabled={loading}
+                  className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
+                  title="Ask a follow-up question"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </button>
+              )}
+              {/* Send notification button */}
+              {(settings.notificationRecipients?.length ?? 0) > 0 && insight && (
+                <button
+                  onClick={sendInsightNotification}
+                  disabled={loading}
+                  className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
+                  title="Send as notification"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                </button>
+              )}
+              {/* Refresh button */}
+              <button
+                onClick={refreshInsight}
+                disabled={loading}
+                className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
+                title="Refresh insight"
+              >
+                <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </button>
+            </div>
           </div>
           <p className="text-slate-700 text-sm leading-relaxed">
             {loading ? (
@@ -485,6 +517,14 @@ export function HomeView() {
           <RelatedEntitiesSection entityId={modalEntity.entity.entity_id} />
         )}
       </EntityControlModal>
+
+      {/* AI Chat Modal */}
+      <AIInsightChat
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        initialInsight={insight || ''}
+        onSendMessage={sendChatMessage}
+      />
     </div>
   )
 }

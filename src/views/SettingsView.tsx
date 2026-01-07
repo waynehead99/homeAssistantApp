@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { getBaseUrl } from '../services/homeAssistant'
 import { isClaudeConfigured } from '../services/claude'
+import { useAttentionAlerts } from '../hooks/useAttentionAlerts'
 
 type EntityType = 'light' | 'switch' | 'climate' | 'vacuum' | 'alarm' | 'valve' | 'fan' | 'lock' | 'sensor' | 'binary_sensor' | 'camera' | 'cover' | 'automation' | 'script'
 
@@ -44,6 +45,10 @@ export function SettingsView() {
   const [entityFilter, setEntityFilter] = useState('')
   const [automationFilter, setAutomationFilter] = useState('')
   const [hiddenFilter, setHiddenFilter] = useState('')
+  const [newRecipient, setNewRecipient] = useState('')
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
+
+  const { checking, minutesUntilNextCheck, testAlerts, lastCheckItems } = useAttentionAlerts()
 
   const handleWeatherChange = (entityId: string) => {
     updateSettings({ primaryWeatherEntity: entityId || null })
@@ -59,6 +64,30 @@ export function SettingsView() {
 
   const handleAIToggle = () => {
     updateSettings({ aiInsightsEnabled: !settings.aiInsightsEnabled })
+  }
+
+  const addNotificationRecipient = () => {
+    if (!newRecipient.trim()) return
+    const current = settings.notificationRecipients || []
+    // Format the device name (remove spaces, lowercase)
+    const deviceName = newRecipient.trim().toLowerCase().replace(/\s+/g, '_')
+    if (!current.includes(deviceName)) {
+      updateSettings({ notificationRecipients: [...current, deviceName] })
+    }
+    setNewRecipient('')
+  }
+
+  const removeNotificationRecipient = (deviceName: string) => {
+    const current = settings.notificationRecipients || []
+    updateSettings({ notificationRecipients: current.filter(r => r !== deviceName) })
+  }
+
+  const handleTestAlerts = async () => {
+    setTestResult(null)
+    const result = await testAlerts()
+    setTestResult({ success: result.success, message: result.message })
+    // Clear result after 5 seconds
+    setTimeout(() => setTestResult(null), 5000)
   }
 
   const handleRefreshIntervalChange = (seconds: number) => {
@@ -627,6 +656,147 @@ export function SettingsView() {
           <p className="text-xs text-amber-400 mt-2">
             Add VITE_CLAUDE_API_KEY to your .env file to enable AI insights.
           </p>
+        )}
+      </section>
+
+      {/* Notification Recipients */}
+      <section className="glass-card p-4">
+        <h3 className="text-sm font-medium text-slate-400 mb-3">Notification Recipients</h3>
+        <p className="text-xs text-slate-500 mb-3">
+          Add mobile devices to receive notifications for alerts (low battery, doors open, etc.).
+          Enter the device name as it appears in Home Assistant (e.g., "waynes_iphone").
+        </p>
+
+        {/* Current recipients */}
+        {(settings.notificationRecipients || []).length > 0 && (
+          <div className="space-y-2 mb-3">
+            {(settings.notificationRecipients || []).map(recipient => (
+              <div
+                key={recipient}
+                className="flex items-center justify-between glass-panel rounded-lg px-3 py-2"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs">📱</span>
+                  <span className="text-sm text-slate-800">{recipient}</span>
+                  <span className="text-xs text-slate-500">
+                    (notify.mobile_app_{recipient})
+                  </span>
+                </div>
+                <button
+                  onClick={() => removeNotificationRecipient(recipient)}
+                  className="p-1 text-slate-500 hover:text-red-400 transition-colors"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add new recipient */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newRecipient}
+            onChange={(e) => setNewRecipient(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addNotificationRecipient()}
+            placeholder="e.g., waynes_iphone"
+            className="flex-1 glass-panel text-slate-800 rounded-lg px-3 py-2 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+          />
+          <button
+            onClick={addNotificationRecipient}
+            disabled={!newRecipient.trim()}
+            className="glass-button px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg text-sm text-white transition-colors"
+          >
+            Add
+          </button>
+        </div>
+
+        {(settings.notificationRecipients || []).length === 0 && (
+          <p className="text-xs text-slate-500 mt-3 italic">
+            No notification recipients configured. Add a device to receive alerts.
+          </p>
+        )}
+
+        {/* Hourly Attention Alerts */}
+        {(settings.notificationRecipients || []).length > 0 && (
+          <div className="border-t border-slate-200 pt-4 mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h4 className="text-sm font-medium text-slate-700">Hourly Attention Alerts</h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Checks for low battery, open doors/windows, upcoming events
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-500">
+                  Next check in {minutesUntilNextCheck} min
+                </p>
+              </div>
+            </div>
+
+            {/* Test button */}
+            <button
+              onClick={handleTestAlerts}
+              disabled={checking}
+              className="w-full glass-button px-4 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg text-sm text-white font-medium transition-colors flex items-center justify-center gap-2"
+            >
+              {checking ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Checking...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  Test Attention Alerts
+                </>
+              )}
+            </button>
+
+            {/* Test result */}
+            {testResult && (
+              <div className={`mt-3 p-3 rounded-lg text-sm ${
+                testResult.success
+                  ? 'bg-green-500/10 text-green-700'
+                  : 'bg-red-500/10 text-red-700'
+              }`}>
+                {testResult.success ? '✓' : '✗'} {testResult.message}
+              </div>
+            )}
+
+            {/* Last check items */}
+            {lastCheckItems.length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs text-slate-500 mb-2">Last check found:</p>
+                <div className="space-y-1">
+                  {lastCheckItems.slice(0, 3).map((item, index) => (
+                    <div
+                      key={index}
+                      className={`text-xs px-2 py-1 rounded ${
+                        item.priority === 'high'
+                          ? 'bg-red-500/10 text-red-700'
+                          : 'bg-amber-500/10 text-amber-700'
+                      }`}
+                    >
+                      {item.message}
+                    </div>
+                  ))}
+                  {lastCheckItems.length > 3 && (
+                    <p className="text-xs text-slate-500">
+                      +{lastCheckItems.length - 3} more items
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </section>
 

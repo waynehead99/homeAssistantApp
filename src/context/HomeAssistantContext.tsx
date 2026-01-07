@@ -49,6 +49,7 @@ export interface AppSettings {
   refreshInterval: number // seconds between auto-refresh
   pinnedEntities: string[] // entity_ids to show on homepage for quick access
   pinnedAutomations: string[] // automation entity_ids to show on homepage
+  notificationRecipients: string[] // mobile app device names for notifications (e.g., "waynes_iphone")
 }
 
 // Default settings
@@ -60,6 +61,7 @@ const defaultSettings: AppSettings = {
   refreshInterval: 30,
   pinnedEntities: [],
   pinnedAutomations: [],
+  notificationRecipients: [],
 }
 
 // State shape
