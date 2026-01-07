@@ -29,6 +29,7 @@ export function HomeView() {
   const [loadingEntities, setLoadingEntities] = useState<Set<string>>(new Set())
   const [modalEntityRef, setModalEntityRef] = useState<ModalEntityRef>(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [startWithVoice, setStartWithVoice] = useState(false)
   const insightLoadedRef = useRef(false)
 
   // Look up the actual entity from context - this updates when context updates
@@ -190,13 +191,32 @@ export function HomeView() {
               <h3 className="font-medium text-blue-700">AI Insights</h3>
             </div>
             <div className="flex items-center gap-1">
+              {/* Voice chat button */}
+              {insight && (
+                <button
+                  onClick={() => {
+                    setIsChatOpen(true)
+                    setStartWithVoice(true)
+                  }}
+                  disabled={loading}
+                  className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
+                  title="Voice chat"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z" />
+                  </svg>
+                </button>
+              )}
               {/* Chat button */}
               {insight && (
                 <button
-                  onClick={() => setIsChatOpen(true)}
+                  onClick={() => {
+                    setIsChatOpen(true)
+                    setStartWithVoice(false)
+                  }}
                   disabled={loading}
                   className="glass-button p-1.5 text-blue-500 hover:text-blue-600 rounded-lg transition-all disabled:opacity-50"
-                  title="Ask a follow-up question"
+                  title="Text chat"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -521,9 +541,13 @@ export function HomeView() {
       {/* AI Chat Modal */}
       <AIInsightChat
         isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
+        onClose={() => {
+          setIsChatOpen(false)
+          setStartWithVoice(false)
+        }}
         initialInsight={insight || ''}
         onSendMessage={sendChatMessage}
+        startWithVoice={startWithVoice}
       />
     </div>
   )

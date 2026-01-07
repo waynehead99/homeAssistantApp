@@ -1,8 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { getBaseUrl } from '../services/homeAssistant'
 import { isClaudeConfigured } from '../services/claude'
 import { useAttentionAlerts } from '../hooks/useAttentionAlerts'
+import {
+  isOpenAIConfigured,
+  getOpenAIApiKey,
+  setOpenAIApiKey,
+  removeOpenAIApiKey,
+  getSelectedVoice,
+  setSelectedVoice,
+  OPENAI_VOICES,
+  type VoiceId,
+} from '../services/openaiSpeech'
 
 type EntityType = 'light' | 'switch' | 'climate' | 'vacuum' | 'alarm' | 'valve' | 'fan' | 'lock' | 'sensor' | 'binary_sensor' | 'camera' | 'cover' | 'automation' | 'script'
 
@@ -47,6 +57,22 @@ export function SettingsView() {
   const [hiddenFilter, setHiddenFilter] = useState('')
   const [newRecipient, setNewRecipient] = useState('')
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
+
+  // OpenAI Speech state
+  const [openAIKey, setOpenAIKey] = useState('')
+  const [openAIConfigured, setOpenAIConfigured] = useState(false)
+  const [selectedVoice, setSelectedVoiceState] = useState<VoiceId>('nova')
+  const [showOpenAIKey, setShowOpenAIKey] = useState(false)
+
+  // Initialize OpenAI state
+  useEffect(() => {
+    setOpenAIConfigured(isOpenAIConfigured())
+    setSelectedVoiceState(getSelectedVoice())
+    const existingKey = getOpenAIApiKey()
+    if (existingKey) {
+      setOpenAIKey(existingKey)
+    }
+  }, [])
 
   const { checking, minutesUntilNextCheck, testAlerts, lastCheckItems } = useAttentionAlerts()
 
@@ -657,6 +683,114 @@ export function SettingsView() {
             Add VITE_CLAUDE_API_KEY to your .env file to enable AI insights.
           </p>
         )}
+      </section>
+
+      {/* Voice Settings (OpenAI) */}
+      <section className="glass-card p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h3 className="text-sm font-medium text-slate-800">Voice Settings</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {openAIConfigured ? 'OpenAI connected - Whisper STT + natural TTS' : 'Configure OpenAI for voice features'}
+            </p>
+          </div>
+          {openAIConfigured && (
+            <div className="w-3 h-3 bg-green-500 rounded-full" title="Connected" />
+          )}
+        </div>
+
+        {/* Voice selection - always show if configured */}
+        {openAIConfigured && (
+          <div className="mb-4">
+            <label className="block text-xs text-slate-600 mb-1.5">TTS Voice</label>
+            <select
+              value={selectedVoice}
+              onChange={(e) => {
+                const voice = e.target.value as VoiceId
+                setSelectedVoiceState(voice)
+                setSelectedVoice(voice)
+              }}
+              className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+            >
+              {Object.entries(OPENAI_VOICES).map(([key, voice]) => (
+                <option key={key} value={key}>
+                  {voice.name} - {voice.description}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* API Key input */}
+        <div className="space-y-2">
+          <label className="block text-xs text-slate-600">
+            OpenAI API Key {openAIConfigured && <span className="text-green-600">(configured)</span>}
+          </label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type={showOpenAIKey ? 'text' : 'password'}
+                value={openAIKey}
+                onChange={(e) => setOpenAIKey(e.target.value)}
+                placeholder="Enter your OpenAI API key (sk-...)"
+                className="w-full glass-panel text-slate-800 rounded-lg px-3 py-2 pr-10 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowOpenAIKey(!showOpenAIKey)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                  {showOpenAIKey ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  ) : (
+                    <>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </div>
+            {openAIConfigured ? (
+              <button
+                onClick={() => {
+                  removeOpenAIApiKey()
+                  setOpenAIKey('')
+                  setOpenAIConfigured(false)
+                }}
+                className="glass-button px-4 py-2 bg-red-500 hover:bg-red-400 rounded-lg text-sm text-white transition-colors"
+              >
+                Remove
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (openAIKey.trim()) {
+                    setOpenAIApiKey(openAIKey.trim())
+                    setOpenAIConfigured(true)
+                  }
+                }}
+                disabled={!openAIKey.trim()}
+                className="glass-button px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-400 disabled:cursor-not-allowed rounded-lg text-sm text-white transition-colors"
+              >
+                Save
+              </button>
+            )}
+          </div>
+          <p className="text-xs text-slate-500">
+            Get an API key at{' '}
+            <a
+              href="https://platform.openai.com/api-keys"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              platform.openai.com
+            </a>
+            {' '}(Whisper: ~$0.006/min, TTS: ~$0.015/1K chars)
+          </p>
+        </div>
       </section>
 
       {/* Notification Recipients */}
