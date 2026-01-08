@@ -37,10 +37,14 @@ const MODE_COLORS: Record<string, string> = {
   fan_only: 'text-green-600 bg-green-500/15',
 }
 
+const DEBOUNCE_DELAY = 3000 // 3 seconds after last adjustment before sending to HA
+
 export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
   const [loading, setLoading] = useState(false)
   const [localTemp, setLocalTemp] = useState(entity.attributes.temperature || 72)
+  const [isPendingSubmit, setIsPendingSubmit] = useState(false)
   const pendingTempRef = useRef<number | null>(null)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Sync local state when entity prop changes (from context updates)
   // But don't overwrite if we have a pending change that HA hasn't confirmed yet
@@ -50,13 +54,23 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
     // If we have a pending temp and HA now matches it, clear the pending state
     if (pendingTempRef.current !== null && entityTemp === pendingTempRef.current) {
       pendingTempRef.current = null
+      setIsPendingSubmit(false)
     }
 
     // Only sync from entity if we don't have a pending change
-    if (pendingTempRef.current === null) {
+    if (pendingTempRef.current === null && !isPendingSubmit) {
       setLocalTemp(entityTemp)
     }
-  }, [entity.attributes.temperature])
+  }, [entity.attributes.temperature, isPendingSubmit])
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
 
   const currentTemp = entity.attributes.current_temperature
   const minTemp = entity.attributes.min_temp || 50
@@ -82,28 +96,40 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
     }
   }
 
-  const handleTempChange = async (delta: number) => {
+  const handleTempChange = (delta: number) => {
     const newTemp = Math.min(maxTemp, Math.max(minTemp, localTemp + delta))
     setLocalTemp(newTemp)
-    pendingTempRef.current = newTemp // Mark as pending until HA confirms
-    setLoading(true)
-    try {
-      // Optimistic update
-      onUpdate({
-        ...entity,
-        attributes: { ...entity.attributes, temperature: newTemp },
-      })
-      await callService('climate', 'set_temperature', {
-        entity_id: entity.entity_id,
-        temperature: newTemp,
-      })
-    } catch (error) {
-      console.error('Failed to set temperature:', error)
-      pendingTempRef.current = null // Clear pending on error
-      onUpdate(entity) // Revert
-    } finally {
-      setLoading(false)
+    pendingTempRef.current = newTemp
+    setIsPendingSubmit(true)
+
+    // Optimistic update for UI
+    onUpdate({
+      ...entity,
+      attributes: { ...entity.attributes, temperature: newTemp },
+    })
+
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
     }
+
+    // Set new timer - will fire after DEBOUNCE_DELAY of no changes
+    debounceTimerRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        await callService('climate', 'set_temperature', {
+          entity_id: entity.entity_id,
+          temperature: newTemp,
+        })
+      } catch (error) {
+        console.error('Failed to set temperature:', error)
+        pendingTempRef.current = null
+        setIsPendingSubmit(false)
+        onUpdate(entity) // Revert on error
+      } finally {
+        setLoading(false)
+      }
+    }, DEBOUNCE_DELAY)
   }
 
   const getActionText = () => {
@@ -149,8 +175,12 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
               +
             </button>
           </div>
-          <div className="text-xs text-slate-400 text-center mt-2">
-            Range: {minTemp}° - {maxTemp}°
+          <div className="text-xs text-center mt-2">
+            {isPendingSubmit ? (
+              <span className="text-blue-500">Saving in a moment...</span>
+            ) : (
+              <span className="text-slate-400">Range: {minTemp}° - {maxTemp}°</span>
+            )}
           </div>
         </div>
       )}
