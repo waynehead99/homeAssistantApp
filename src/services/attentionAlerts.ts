@@ -243,8 +243,34 @@ export async function sendAttentionAlerts(
 }
 
 // Track last check time to avoid duplicate notifications
-let lastCheckTime = 0
 const CHECK_INTERVAL = 60 * 60 * 1000 // 1 hour
+const STORAGE_KEY = 'attention_alerts_last_check'
+
+// Initialize from localStorage or set to a time that allows first check after 1 hour
+function getStoredLastCheckTime(): number {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      return parseInt(stored, 10)
+    }
+  } catch {
+    // localStorage not available
+  }
+  // If no stored time, set to now so first check happens in 1 hour
+  const now = Date.now()
+  saveLastCheckTime(now)
+  return now
+}
+
+function saveLastCheckTime(time: number): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, time.toString())
+  } catch {
+    // localStorage not available
+  }
+}
+
+let lastCheckTime = getStoredLastCheckTime()
 
 // Check if enough time has passed since last check
 export function shouldRunCheck(): boolean {
@@ -255,6 +281,7 @@ export function shouldRunCheck(): boolean {
 // Mark that a check was performed
 export function markCheckComplete(): void {
   lastCheckTime = Date.now()
+  saveLastCheckTime(lastCheckTime)
 }
 
 // Get time until next check in minutes

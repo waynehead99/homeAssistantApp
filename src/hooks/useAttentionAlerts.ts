@@ -42,10 +42,10 @@ export function useAttentionAlerts() {
     setChecking(true)
     try {
       const result = await sendAttentionAlerts(getContext())
-      if (result.sent) {
-        setLastCheckItems(result.items)
-        markCheckComplete()
-      }
+      setLastCheckItems(result.items)
+      // Always mark complete after checking, even if nothing was sent
+      markCheckComplete()
+      setMinutesUntilNextCheck(getMinutesUntilNextCheck())
     } catch (error) {
       console.error('Attention check failed:', error)
     } finally {
@@ -126,13 +126,20 @@ export function useAttentionAlerts() {
     }
   }, [getContext])
 
-  // Set up hourly check interval (only runs on schedule, not on app open)
+  // Set up hourly check interval
   useEffect(() => {
     const recipients = settings.notificationRecipients || []
     if (recipients.length === 0) return
 
+    // Update the countdown display immediately
+    setMinutesUntilNextCheck(getMinutesUntilNextCheck())
+
+    // Check if we're due for a check (e.g., app was closed for a while)
+    if (shouldRunCheck()) {
+      runCheck()
+    }
+
     // Set up interval to check every minute if it's time for hourly check
-    // Does NOT check immediately on app open to avoid being a nuisance
     const intervalId = setInterval(() => {
       setMinutesUntilNextCheck(getMinutesUntilNextCheck())
 
