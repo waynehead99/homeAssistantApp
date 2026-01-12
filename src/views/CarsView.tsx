@@ -17,6 +17,7 @@ interface CarData {
   isHome?: boolean
   isCharging?: boolean
   isLocked?: boolean
+  alarmStatus?: string // Alarm status (armed, disarmed, etc.)
   doorsOpen?: string[]
   windowsOpen?: string[]
   tirePressure?: { [key: string]: number }
@@ -239,6 +240,13 @@ export function CarsView() {
           car.isLocked = lockedVal === true || lockedVal === 'locked' || lockedVal === 'Locked' || lockedVal === 1
         }
 
+        // Alarm status - check fordpass_alarm and alarm entities
+        if (id.includes('fordpass_alarm') || id.includes('alarm')) {
+          if (state && state !== 'unknown' && state !== 'unavailable') {
+            car.alarmStatus = state
+          }
+        }
+
         // Door status
         if (id.includes('door') && entity.entity_id.startsWith('binary_sensor.')) {
           if (state === 'on' || state === 'open') {
@@ -447,13 +455,30 @@ function CarCard({ car }: { car: CarData }) {
               )}
             </div>
           </div>
-          {car.isLocked !== undefined && (
-            <div className={`glass-panel px-3 py-1.5 rounded-lg ${car.isLocked ? 'bg-green-500/15' : 'bg-yellow-500/15'}`}>
-              <span className={`text-sm font-medium ${car.isLocked ? 'text-green-600' : 'text-yellow-600'}`}>
-                {car.isLocked ? '🔒 Locked' : '🔓 Unlocked'}
-              </span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {car.alarmStatus && (
+              <div className={`glass-panel px-3 py-1.5 rounded-lg ${
+                car.alarmStatus.toLowerCase() === 'set' || car.alarmStatus.toLowerCase() === 'armed'
+                  ? 'bg-green-500/15'
+                  : 'bg-slate-200'
+              }`}>
+                <span className={`text-sm font-medium ${
+                  car.alarmStatus.toLowerCase() === 'set' || car.alarmStatus.toLowerCase() === 'armed'
+                    ? 'text-green-600'
+                    : 'text-slate-500'
+                }`}>
+                  🚨 {car.alarmStatus}
+                </span>
+              </div>
+            )}
+            {car.isLocked !== undefined && (
+              <div className={`glass-panel px-3 py-1.5 rounded-lg ${car.isLocked ? 'bg-green-500/15' : 'bg-yellow-500/15'}`}>
+                <span className={`text-sm font-medium ${car.isLocked ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {car.isLocked ? '🔒 Locked' : '🔓 Unlocked'}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
