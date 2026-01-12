@@ -240,7 +240,8 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
                       lock.entity_id,
                       lock.attributes.friendly_name || lock.entity_id.split('.')[1].replace(/_/g, ' ')
                     )
-                    const isLocked = lock.state === 'locked'
+                    const isFordLock = lock.entity_id.toLowerCase().includes('fordpass')
+                    const isLocked = lock.state === 'locked' || (isFordLock && isFordAlarmArmed)
                     const isJammed = lock.state === 'jammed'
                     const isSelected = lock.entity_id === modalEntity.entity.entity_id
                     return (
