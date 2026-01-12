@@ -452,9 +452,9 @@ function CarCard({ car }: { car: CarData }) {
             <span className="text-2xl">{getBrandIcon()}</span>
             <div>
               <h2 className="text-lg font-semibold text-slate-800">{car.name}</h2>
-              {car.location && (
+              {(car.location || effectivelyLocked) && (
                 <p className={`text-sm ${car.isHome ? 'text-green-600' : 'text-slate-500'}`}>
-                  {car.isHome ? '📍 ' : ''}{car.location}
+                  {car.isHome ? '📍 ' : ''}{car.location}{car.location && effectivelyLocked ? ' • ' : ''}{effectivelyLocked ? '🔒 Secured' : ''}
                 </p>
               )}
             </div>
