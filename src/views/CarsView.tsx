@@ -430,6 +430,10 @@ function CarCard({ car }: { car: CarData }) {
   const hasDef = car.defLevel !== undefined
   const primaryRange = car.electricRange || car.range
 
+  // Alarm armed means doors are effectively locked
+  const isAlarmArmed = car.alarmStatus?.toLowerCase() === 'set' || car.alarmStatus?.toLowerCase() === 'armed'
+  const effectivelyLocked = isAlarmArmed || car.isLocked
+
   // Get battery status color based on text value
   const getBatteryStatusColor = (status: string) => {
     const s = status.toLowerCase()
@@ -458,12 +462,12 @@ function CarCard({ car }: { car: CarData }) {
           <div className="flex items-center gap-2">
             {car.alarmStatus && (
               <div className={`glass-panel px-3 py-1.5 rounded-lg ${
-                car.alarmStatus.toLowerCase() === 'set' || car.alarmStatus.toLowerCase() === 'armed'
+                isAlarmArmed
                   ? 'bg-green-500/15'
                   : 'bg-slate-200'
               }`}>
                 <span className={`text-sm font-medium ${
-                  car.alarmStatus.toLowerCase() === 'set' || car.alarmStatus.toLowerCase() === 'armed'
+                  isAlarmArmed
                     ? 'text-green-600'
                     : 'text-slate-500'
                 }`}>
@@ -471,10 +475,10 @@ function CarCard({ car }: { car: CarData }) {
                 </span>
               </div>
             )}
-            {car.isLocked !== undefined && (
-              <div className={`glass-panel px-3 py-1.5 rounded-lg ${car.isLocked ? 'bg-green-500/15' : 'bg-yellow-500/15'}`}>
-                <span className={`text-sm font-medium ${car.isLocked ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {car.isLocked ? '🔒 Locked' : '🔓 Unlocked'}
+            {(car.isLocked !== undefined || isAlarmArmed) && (
+              <div className={`glass-panel px-3 py-1.5 rounded-lg ${effectivelyLocked ? 'bg-green-500/15' : 'bg-yellow-500/15'}`}>
+                <span className={`text-sm font-medium ${effectivelyLocked ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {effectivelyLocked ? '🔒 Locked' : '🔓 Unlocked'}
                 </span>
               </div>
             )}
