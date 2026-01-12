@@ -147,16 +147,16 @@ export function CarsView() {
         // Fuel level - check both state and attributes (Ford uses fordpass_fuel, FuelLevel, fuel_level, tank_level)
         if ((id.includes('fuel') || id.includes('tank') || id.includes('fordpass_fuel')) && !id.includes('consumption') && !id.includes('range') && !id.includes('economy')) {
           const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'fuel_level', 'fuelLevel', 'FuelLevel', 'tanklevelpercent', 'fuel', 'tank_level', 'tankLevel', 'TankLevel'))
-          // Handle percentage values (0-100) or fractional values (0-1)
+          // Handle percentage values - cap at 100 (some sensors report slightly over)
           if (val !== null && val >= 0) {
-            car.fuelLevel = val <= 1 ? val * 100 : (val <= 100 ? val : undefined)
+            car.fuelLevel = Math.min(100, val <= 1 ? val * 100 : val)
           }
         }
         // Check fuel attributes on any entity (Ford sometimes has fuel in main sensor attributes)
         if (car.fuelLevel === undefined) {
           const val = parseNumeric(getAttr(attrs, 'fuel_level', 'fuelLevel', 'FuelLevel', 'tanklevelpercent', 'fuel', 'Fuel', 'tank_level', 'tankLevel', 'TankLevel', 'fuelLevelPercent', 'FuelLevelPercent', 'fuel_level_percent'))
-          if (val !== null && val >= 0 && val <= 100) {
-            car.fuelLevel = val
+          if (val !== null && val >= 0) {
+            car.fuelLevel = Math.min(100, val)
           }
         }
 
