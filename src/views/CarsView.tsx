@@ -324,18 +324,18 @@ export function CarsView() {
           }
         })
 
-        // Oil Life - check state and attributes (Ford uses oilLife, OilLife, oil_life_remaining)
-        if (id.includes('oil') && (id.includes('life') || id.includes('remaining'))) {
+        // Oil Life - check state and attributes (Ford uses fordpass_oil, oilLife, OilLife, oil_life_remaining)
+        if (id.includes('fordpass_oil') || (id.includes('oil') && (id.includes('life') || id.includes('remaining')))) {
           const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'oil_life', 'oilLife', 'OilLife', 'oilLifeRemaining', 'OilLifeRemaining', 'oil_life_remaining'))
-          if (val !== null && val >= 0 && val <= 100) {
-            car.oilLife = val
+          if (val !== null && val >= 0) {
+            car.oilLife = Math.min(100, val)
           }
         }
         // Check oil life in attributes on all entities
         if (car.oilLife === undefined) {
           const val = parseNumeric(getAttr(attrs, 'oil_life', 'oilLife', 'OilLife', 'oilLifeRemaining', 'OilLifeRemaining', 'oil_life_remaining', 'oilLifeActual', 'OilLifeActual'))
-          if (val !== null && val >= 0 && val <= 100) {
-            car.oilLife = val
+          if (val !== null && val >= 0) {
+            car.oilLife = Math.min(100, val)
           }
         }
 
