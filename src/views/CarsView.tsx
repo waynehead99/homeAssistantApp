@@ -120,11 +120,11 @@ export function CarsView() {
         const state = entity.state
         const attrs = entity.attributes as Record<string, unknown>
 
-        // Battery/State of charge - check both state and attributes
-        if (id.includes('battery') || id.includes('state_of_charge') || id.includes('soc') || id.includes('elveh')) {
+        // Battery/State of charge - check both state and attributes (skip for Mercedes - not readable)
+        if (car.brand !== 'mercedes' && (id.includes('battery') || id.includes('state_of_charge') || id.includes('soc') || id.includes('elveh'))) {
           const stateStr = state.trim().toLowerCase()
 
-          // Check for text-based status first (Mercedes uses green/yellow/red)
+          // Check for text-based status first
           const textStatuses = ['green', 'yellow', 'red', 'good', 'ok', 'warning', 'medium', 'critical', 'low']
           if (textStatuses.includes(stateStr)) {
             car.batteryStatus = state.trim() // Keep original case for display
@@ -137,8 +137,8 @@ export function CarsView() {
           }
         }
 
-        // Also check for battery_level in attributes (Ford uses this) - but not if we have a text status
-        if (car.batteryLevel === undefined && car.batteryStatus === undefined) {
+        // Also check for battery_level in attributes (Ford uses this) - skip for Mercedes
+        if (car.brand !== 'mercedes' && car.batteryLevel === undefined && car.batteryStatus === undefined) {
           const attrVal = parseNumeric(getAttr(attrs, 'battery_level', 'batteryLevel', 'BatteryLevel', 'state_of_charge', 'stateOfCharge', 'StateOfCharge', 'battery', 'Battery'))
           if (attrVal !== null && attrVal > 0 && attrVal <= 100) {
             car.batteryLevel = attrVal
