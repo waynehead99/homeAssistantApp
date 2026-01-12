@@ -161,22 +161,22 @@ export function CarsView() {
           }
         }
 
-        // Range - Mercedes uses range_liquid (prioritize this)
-        if (id.includes('range_liquid') || id.includes('rangeliquid')) {
+        // Range - Mercedes only uses range_liquid
+        if (car.brand === 'mercedes' && (id.includes('range_liquid') || id.includes('rangeliquid'))) {
           const val = parseNumeric(state)
           if (val !== null && val > 0) {
-            car.range = val // Override any previous range value
+            car.range = val
           }
         }
-        // Range - check state and common attribute names (Ford uses FuelRange, DistanceToEmpty)
-        else if ((id.includes('range') || id.includes('distance_to_empty') || id.includes('dte')) && !id.includes('electric') && !id.includes('elec_')) {
+        // Range - Ford uses FuelRange, DistanceToEmpty (skip for Mercedes)
+        else if (car.brand !== 'mercedes' && (id.includes('range') || id.includes('distance_to_empty') || id.includes('dte')) && !id.includes('electric') && !id.includes('elec_')) {
           const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'range', 'Range', 'FuelRange', 'fuelRange', 'fuel_range', 'total_range', 'totalRange', 'DistanceToEmpty', 'distanceToEmpty', 'distance_to_empty', 'dte'))
           if (val !== null && val > 0 && car.range === undefined) {
             car.range = val
           }
         }
-        // Check range attributes on all entities
-        if (car.range === undefined) {
+        // Check range attributes on all entities (skip for Mercedes)
+        if (car.brand !== 'mercedes' && car.range === undefined) {
           const val = parseNumeric(getAttr(attrs, 'range', 'Range', 'FuelRange', 'fuelRange', 'fuel_range', 'total_range', 'totalRange', 'DistanceToEmpty', 'distanceToEmpty', 'distance_to_empty', 'rangeliquid', 'RangeLiquid'))
           if (val !== null && val > 0) {
             car.range = val
