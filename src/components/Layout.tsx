@@ -17,7 +17,7 @@ type ModalEntity =
   | null
 
 export function Layout({ children, title = 'Home' }: LayoutProps) {
-  const { refresh, connectionStatus, primaryWeather, filteredPeople, locks, alarms, hiddenEntities, updateEntity, getDisplayName } = useHomeAssistantContext()
+  const { refresh, connectionStatus, primaryWeather, filteredPeople, locks, alarms, sensors, hiddenEntities, updateEntity, getDisplayName } = useHomeAssistantContext()
   const [modalEntity, setModalEntity] = useState<ModalEntity>(null)
 
   // Filter out hidden entities
@@ -54,15 +54,28 @@ export function Layout({ children, title = 'Home' }: LayoutProps) {
     return { text: 'Disarmed', color: 'text-slate-400', bgColor: 'bg-slate-700' }
   }
 
+  // Check if Ford alarm is armed (considers car doors locked)
+  const fordAlarmSensor = sensors.find(s => s.entity_id === 'sensor.fordpass_alarm')
+  const isFordAlarmArmed = fordAlarmSensor?.state?.toLowerCase() === 'set' || fordAlarmSensor?.state?.toLowerCase() === 'armed'
+
   // Get lock summary
   const getLockSummary = () => {
+    // If no locks but Ford alarm is armed, show as secured
+    if (visibleLocks.length === 0 && isFordAlarmArmed) {
+      return { text: 'Secured', color: 'text-green-400', bgColor: 'bg-green-500/20', icon: '🔒' }
+    }
     if (visibleLocks.length === 0) return null
+
     const lockedCount = visibleLocks.filter(l => l.state === 'locked').length
     const jammedCount = visibleLocks.filter(l => l.state === 'jammed').length
     const unlockedCount = visibleLocks.filter(l => l.state === 'unlocked').length
 
     if (jammedCount > 0) {
       return { text: `${jammedCount} Jammed`, color: 'text-red-400', bgColor: 'bg-red-500/20', icon: '⚠️' }
+    }
+    // If Ford alarm is armed, consider everything locked regardless of lock states
+    if (isFordAlarmArmed) {
+      return { text: `${visibleLocks.length} Locked`, color: 'text-green-400', bgColor: 'bg-green-500/20', icon: '🔒' }
     }
     if (unlockedCount > 0) {
       return { text: `${unlockedCount} Unlocked`, color: 'text-yellow-400', bgColor: 'bg-yellow-500/20', icon: '🔓' }
