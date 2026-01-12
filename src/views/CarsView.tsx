@@ -144,17 +144,17 @@ export function CarsView() {
           }
         }
 
-        // Fuel level - check both state and attributes (Ford uses FuelLevel)
-        if (id.includes('fuel') && !id.includes('consumption') && !id.includes('range')) {
-          const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'fuel_level', 'fuelLevel', 'FuelLevel', 'tanklevelpercent', 'fuel'))
-          if (val !== null && val <= 100) {
+        // Fuel level - check both state and attributes (Ford uses FuelLevel, fuel_level, tank_level)
+        if ((id.includes('fuel') || id.includes('tank')) && !id.includes('consumption') && !id.includes('range') && !id.includes('economy')) {
+          const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'fuel_level', 'fuelLevel', 'FuelLevel', 'tanklevelpercent', 'fuel', 'tank_level', 'tankLevel', 'TankLevel'))
+          if (val !== null && val >= 0 && val <= 100) {
             car.fuelLevel = val
           }
         }
-        // Check fuel attributes on any entity
+        // Check fuel attributes on any entity (Ford sometimes has fuel in main sensor attributes)
         if (car.fuelLevel === undefined) {
-          const val = parseNumeric(getAttr(attrs, 'fuel_level', 'fuelLevel', 'FuelLevel', 'tanklevelpercent', 'fuel', 'Fuel'))
-          if (val !== null && val <= 100) {
+          const val = parseNumeric(getAttr(attrs, 'fuel_level', 'fuelLevel', 'FuelLevel', 'tanklevelpercent', 'fuel', 'Fuel', 'tank_level', 'tankLevel', 'TankLevel', 'fuelLevelPercent', 'FuelLevelPercent', 'fuel_level_percent'))
+          if (val !== null && val >= 0 && val <= 100) {
             car.fuelLevel = val
           }
         }
@@ -418,6 +418,7 @@ function CarCard({ car }: { car: CarData }) {
   const hasBattery = car.batteryLevel !== undefined
   const hasBatteryStatus = car.batteryStatus !== undefined
   const hasFuel = car.fuelLevel !== undefined
+  const hasDef = car.defLevel !== undefined
   const primaryRange = car.electricRange || car.range
 
   // Get battery status color based on text value
@@ -456,7 +457,7 @@ function CarCard({ car }: { car: CarData }) {
       </div>
 
       {/* Energy Levels */}
-      {(hasBattery || hasBatteryStatus || hasFuel) && (
+      {(hasBattery || hasBatteryStatus || hasFuel || hasDef) && (
         <div className="px-5 py-4 border-t border-slate-200">
           <div className="grid grid-cols-2 gap-4">
             {/* Battery Status - text-based (Mercedes style) - show this FIRST if available */}
@@ -513,6 +514,28 @@ function CarCard({ car }: { car: CarData }) {
                 </div>
               </div>
             )}
+
+            {/* DEF Level */}
+            {hasDef && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-slate-500">DEF</span>
+                  <span className="text-sm font-medium text-slate-800">{Math.round(car.defLevel!)}%</span>
+                </div>
+                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      car.defLevel! > 30 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' :
+                      car.defLevel! > 10 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-orange-400'
+                    }`}
+                    style={{ width: `${car.defLevel}%` }}
+                  />
+                </div>
+                {car.defLevel! <= 10 && (
+                  <p className="text-xs text-red-600 mt-1">Refill needed</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -564,52 +587,25 @@ function CarCard({ car }: { car: CarData }) {
         </div>
       )}
 
-      {/* Maintenance - Oil Life & DEF */}
-      {(car.oilLife !== undefined || car.defLevel !== undefined) && (
+      {/* Maintenance - Oil Life */}
+      {car.oilLife !== undefined && (
         <div className="px-5 py-4 border-t border-slate-200">
-          <div className="grid grid-cols-2 gap-4">
-            {/* Oil Life */}
-            {car.oilLife !== undefined && (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-500">Oil Life</span>
-                  <span className="text-sm font-medium text-slate-800">{Math.round(car.oilLife)}%</span>
-                </div>
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      car.oilLife > 30 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
-                      car.oilLife > 10 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-orange-400'
-                    }`}
-                    style={{ width: `${car.oilLife}%` }}
-                  />
-                </div>
-                {car.oilLife <= 10 && (
-                  <p className="text-xs text-red-600 mt-1">Service needed</p>
-                )}
-              </div>
-            )}
-
-            {/* DEF Level */}
-            {car.defLevel !== undefined && (
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-slate-500">DEF</span>
-                  <span className="text-sm font-medium text-slate-800">{Math.round(car.defLevel)}%</span>
-                </div>
-                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all ${
-                      car.defLevel > 30 ? 'bg-gradient-to-r from-blue-500 to-cyan-400' :
-                      car.defLevel > 10 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-orange-400'
-                    }`}
-                    style={{ width: `${car.defLevel}%` }}
-                  />
-                </div>
-                {car.defLevel <= 10 && (
-                  <p className="text-xs text-red-600 mt-1">Refill needed</p>
-                )}
-              </div>
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-slate-500">Oil Life</span>
+              <span className="text-sm font-medium text-slate-800">{Math.round(car.oilLife)}%</span>
+            </div>
+            <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${
+                  car.oilLife > 30 ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
+                  car.oilLife > 10 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-orange-400'
+                }`}
+                style={{ width: `${car.oilLife}%` }}
+              />
+            </div>
+            {car.oilLife <= 10 && (
+              <p className="text-xs text-red-600 mt-1">Service needed</p>
             )}
           </div>
         </div>
