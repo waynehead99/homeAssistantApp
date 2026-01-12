@@ -161,11 +161,14 @@ export function CarsView() {
           }
         }
 
-        // Range - check state and common attribute names (Ford uses FuelRange, DistanceToEmpty)
-        if (id.includes('range') || id.includes('distance_to_empty') || id.includes('dte')) {
-          const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'range', 'Range', 'FuelRange', 'fuelRange', 'fuel_range', 'total_range', 'totalRange', 'DistanceToEmpty', 'distanceToEmpty', 'distance_to_empty', 'dte'))
-          if (val !== null && val > 0 && car.range === undefined) {
-            car.range = val
+        // Range - check state and common attribute names (Ford uses FuelRange, DistanceToEmpty, Mercedes uses range_liquid)
+        if (id.includes('range_liquid') || id.includes('rangeliquid') || id.includes('range') || id.includes('distance_to_empty') || id.includes('dte')) {
+          // Skip electric range sensors for fuel range
+          if (!id.includes('electric') && !id.includes('elec_')) {
+            const val = parseNumeric(state) ?? parseNumeric(getAttr(attrs, 'range', 'Range', 'FuelRange', 'fuelRange', 'fuel_range', 'total_range', 'totalRange', 'DistanceToEmpty', 'distanceToEmpty', 'distance_to_empty', 'dte'))
+            if (val !== null && val > 0 && car.range === undefined) {
+              car.range = val
+            }
           }
         }
         // Check range attributes on all entities
