@@ -240,8 +240,8 @@ export function CarsView() {
           car.isLocked = lockedVal === true || lockedVal === 'locked' || lockedVal === 'Locked' || lockedVal === 1
         }
 
-        // Alarm status - check fordpass_alarm and alarm entities
-        if (id.includes('fordpass_alarm') || id.includes('alarm')) {
+        // Alarm status - check fordpass_alarm, interior_protection (Mercedes), and alarm entities
+        if (id.includes('fordpass_alarm') || id.includes('interior_protection') || id.includes('alarm')) {
           if (state && state !== 'unknown' && state !== 'unavailable') {
             car.alarmStatus = state
           }
