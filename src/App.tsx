@@ -14,9 +14,20 @@ import { CarsView } from './views/CarsView'
 import { CamperView } from './views/CamperView'
 import { HouseModeView } from './views/HouseModeView'
 
+const validTabs: TabId[] = ['home', 'rooms', 'cameras', 'weather', 'calendar', 'cars', 'camper', 'houseMode', 'settings']
+
+function getInitialTab(): TabId {
+  const params = new URLSearchParams(window.location.search)
+  const tab = params.get('tab')
+  if (tab && validTabs.includes(tab as TabId)) {
+    return tab as TabId
+  }
+  return 'home'
+}
+
 function AppContent() {
   const { configured, connectionStatus } = useHomeAssistantContext()
-  const [activeTab, setActiveTab] = useState<TabId>('home')
+  const [activeTab, setActiveTab] = useState<TabId>(getInitialTab)
 
   // Show setup screen if not configured or connection error
   if (!configured || connectionStatus === 'error') {
