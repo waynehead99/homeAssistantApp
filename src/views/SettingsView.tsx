@@ -63,32 +63,21 @@ export function SettingsView() {
   const [selectedVoice, setSelectedVoiceState] = useState<VoiceId>('nova')
   const [showOpenAIKey, setShowOpenAIKey] = useState(false)
 
-  // Initialize OpenAI state from HA-synced settings (with localStorage fallback)
+  // Initialize OpenAI state from settings (single source of truth)
   useEffect(() => {
-    // Priority: HA settings > localStorage
-    const haKey = settings.openaiApiKey
-    const haVoice = settings.openaiVoice as VoiceId | undefined
-    const localKey = getOpenAIApiKey()
-    const localVoice = getSelectedVoice()
+    const key = settings.openaiApiKey || getOpenAIApiKey() || ''
+    const voice = (settings.openaiVoice as VoiceId | undefined) || getSelectedVoice() || 'nova'
 
-    // Use HA settings if available, otherwise localStorage
-    const effectiveKey = haKey || localKey || ''
-    const effectiveVoice = haVoice || localVoice || 'nova'
+    setOpenAIKey(key)
+    setSelectedVoiceState(voice)
+    setOpenAIConfigured(!!key)
 
-    setOpenAIKey(effectiveKey)
-    setSelectedVoiceState(effectiveVoice)
-    setOpenAIConfigured(!!effectiveKey)
-
-    // If HA has settings but localStorage doesn't, sync to localStorage for the service
-    if (haKey && !localKey) {
-      setOpenAIApiKey(haKey)
+    // Keep localStorage in sync for the openaiSpeech service to read
+    if (key) {
+      setOpenAIApiKey(key)
     }
-    if (haVoice && haVoice !== localVoice) {
-      setSelectedVoice(haVoice)
-    }
-    // If localStorage has settings but HA doesn't, sync to HA
-    if (localKey && !haKey) {
-      updateSettings({ openaiApiKey: localKey, openaiVoice: localVoice })
+    if (voice) {
+      setSelectedVoice(voice)
     }
   }, [settings.openaiApiKey, settings.openaiVoice])
 

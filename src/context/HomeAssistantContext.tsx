@@ -9,17 +9,23 @@ import {
   useRef,
   type ReactNode,
 } from 'react'
-import type { HAState, ConnectionStatus, LightEntity, SwitchEntity, SensorEntity, BinarySensorEntity, WeatherEntity, PersonEntity, CameraEntity, CalendarEntity, ClimateEntity, VacuumEntity, AlarmEntity, ValveEntity, FanEntity, LockEntity, CoverEntity, AutomationEntity, ScriptEntity, HAArea, HAEntityRegistryEntry, HADevice } from '../types/homeAssistant'
+import type { HAState, LightEntity, SwitchEntity, SensorEntity, BinarySensorEntity, WeatherEntity, PersonEntity, ClimateEntity, VacuumEntity, AlarmEntity, ValveEntity, FanEntity, LockEntity, CoverEntity, HAArea } from '../types/homeAssistant'
 import { isConfigured, getStates, testConnection, getAreas, getEntityRegistry, getDeviceRegistry, setServiceCallCallback } from '../services/homeAssistant'
 import { shouldShowSensor, shouldShowBinarySensor } from '../utils/sensorFilters'
 import {
   initializeSync,
   loadAllFromHA,
-  saveSettingsToHA,
-  saveHiddenEntitiesToHA,
-  saveHiddenRoomsToHA,
-  saveCustomNamesToHA,
+  debouncedSaveSettingsToHA,
+  debouncedSaveHiddenEntitiesToHA,
+  debouncedSaveHiddenRoomsToHA,
+  debouncedSaveCustomNamesToHA,
 } from '../services/settingsSync'
+import {
+  haReducer,
+  initialState,
+  defaultSettings,
+  type HAContextState,
+} from './haReducer'
 
 // Entities grouped by area
 export interface EntitiesByArea {
@@ -52,464 +58,6 @@ export interface AppSettings {
   notificationRecipients: string[] // mobile app device names for notifications (e.g., "waynes_iphone")
   openaiApiKey?: string // OpenAI API key for voice features (Whisper STT + TTS)
   openaiVoice?: string // Selected OpenAI TTS voice (alloy, echo, fable, onyx, nova, shimmer)
-}
-
-// Default settings
-const defaultSettings: AppSettings = {
-  primaryWeatherEntity: null,
-  calendarPattern: 'erikson',
-  peoplePattern: 'shelby|wayne',
-  aiInsightsEnabled: true,
-  refreshInterval: 30,
-  pinnedEntities: [],
-  pinnedAutomations: [],
-  notificationRecipients: [],
-}
-
-// State shape
-interface HAContextState {
-  configured: boolean
-  connectionStatus: ConnectionStatus
-  settingsLoaded: boolean // Whether settings have been loaded from HA/localStorage
-  syncEnabled: boolean // Whether HA sync is available
-  entities: HAState[]
-  lights: LightEntity[]
-  switches: SwitchEntity[]
-  sensors: SensorEntity[]
-  binarySensors: BinarySensorEntity[]
-  weather: WeatherEntity[]
-  people: PersonEntity[]
-  cameras: CameraEntity[]
-  calendars: CalendarEntity[]
-  climate: ClimateEntity[]
-  vacuums: VacuumEntity[]
-  alarms: AlarmEntity[]
-  valves: ValveEntity[]
-  fans: FanEntity[]
-  locks: LockEntity[]
-  covers: CoverEntity[]
-  automations: AutomationEntity[]
-  scripts: ScriptEntity[]
-  areas: HAArea[]
-  devices: HADevice[]
-  entityAreaMap: Map<string, string>
-  entityDeviceMap: Map<string, string> // entity_id -> device_id
-  hiddenEntities: Set<string>
-  hiddenRooms: Set<string>
-  customNames: Map<string, string> // key: entity_id or area_id, value: custom name
-  settings: AppSettings
-  error: string | null
-  lastUpdated: Date | null
-}
-
-// Actions
-type HAAction =
-  | { type: 'SET_CONNECTION_STATUS'; status: ConnectionStatus; error?: string }
-  | { type: 'SET_ENTITIES'; entities: HAState[] }
-  | { type: 'SET_AREAS'; areas: HAArea[]; entityRegistry: HAEntityRegistryEntry[]; devices: HADevice[] }
-  | { type: 'UPDATE_ENTITY'; entity: HAState }
-  | { type: 'SET_HIDDEN_ENTITIES'; hidden: Set<string> }
-  | { type: 'HIDE_ENTITY'; entityId: string }
-  | { type: 'SHOW_ENTITY'; entityId: string }
-  | { type: 'HIDE_ROOM'; roomId: string }
-  | { type: 'SHOW_ROOM'; roomId: string }
-  | { type: 'SET_HIDDEN_ROOMS'; hidden: Set<string> }
-  | { type: 'SET_CUSTOM_NAME'; id: string; name: string }
-  | { type: 'SET_CUSTOM_NAMES'; names: Map<string, string> }
-  | { type: 'REMOVE_CUSTOM_NAME'; id: string }
-  | { type: 'SET_SETTINGS'; settings: Partial<AppSettings> }
-  | { type: 'LOAD_SYNCED_DATA'; settings: AppSettings; hiddenEntities: Set<string>; hiddenRooms: Set<string>; customNames: Map<string, string>; syncEnabled: boolean }
-  | { type: 'SET_ERROR'; error: string }
-  | { type: 'CLEAR_ERROR' }
-
-// Load hidden entities from localStorage
-function loadHiddenEntities(): Set<string> {
-  try {
-    const stored = localStorage.getItem('hiddenEntities')
-    if (stored) {
-      return new Set(JSON.parse(stored))
-    }
-  } catch {
-    // Ignore errors
-  }
-  return new Set()
-}
-
-// Save hidden entities to localStorage
-function saveHiddenEntities(hidden: Set<string>) {
-  try {
-    localStorage.setItem('hiddenEntities', JSON.stringify([...hidden]))
-  } catch {
-    // Ignore errors
-  }
-}
-
-// Load hidden rooms from localStorage
-function loadHiddenRooms(): Set<string> {
-  try {
-    const stored = localStorage.getItem('hiddenRooms')
-    if (stored) {
-      return new Set(JSON.parse(stored))
-    }
-  } catch {
-    // Ignore errors
-  }
-  return new Set()
-}
-
-// Save hidden rooms to localStorage
-function saveHiddenRooms(hidden: Set<string>) {
-  try {
-    localStorage.setItem('hiddenRooms', JSON.stringify([...hidden]))
-  } catch {
-    // Ignore errors
-  }
-}
-
-// Load custom names from localStorage
-function loadCustomNames(): Map<string, string> {
-  try {
-    const stored = localStorage.getItem('customNames')
-    if (stored) {
-      return new Map(JSON.parse(stored))
-    }
-  } catch {
-    // Ignore errors
-  }
-  return new Map()
-}
-
-// Save custom names to localStorage
-function saveCustomNames(names: Map<string, string>) {
-  try {
-    localStorage.setItem('customNames', JSON.stringify([...names]))
-  } catch {
-    // Ignore errors
-  }
-}
-
-// Load settings from localStorage
-function loadSettings(): AppSettings {
-  try {
-    const stored = localStorage.getItem('appSettings')
-    if (stored) {
-      return { ...defaultSettings, ...JSON.parse(stored) }
-    }
-  } catch {
-    // Ignore errors
-  }
-  return defaultSettings
-}
-
-// Save settings to localStorage
-function saveSettings(settings: AppSettings) {
-  try {
-    localStorage.setItem('appSettings', JSON.stringify(settings))
-  } catch {
-    // Ignore errors
-  }
-}
-
-// Initial state - start with empty settings, will be loaded from HA or localStorage
-const initialState: HAContextState = {
-  configured: isConfigured(),
-  connectionStatus: 'disconnected',
-  settingsLoaded: false,
-  syncEnabled: false,
-  entities: [],
-  lights: [],
-  switches: [],
-  sensors: [],
-  binarySensors: [],
-  weather: [],
-  people: [],
-  cameras: [],
-  calendars: [],
-  climate: [],
-  vacuums: [],
-  alarms: [],
-  valves: [],
-  fans: [],
-  locks: [],
-  covers: [],
-  automations: [],
-  scripts: [],
-  areas: [],
-  devices: [],
-  entityAreaMap: new Map(),
-  entityDeviceMap: new Map(),
-  hiddenEntities: new Set(),
-  hiddenRooms: new Set(),
-  customNames: new Map(),
-  settings: defaultSettings,
-  error: null,
-  lastUpdated: null,
-}
-
-// Reducer
-function haReducer(state: HAContextState, action: HAAction): HAContextState {
-  switch (action.type) {
-    case 'SET_CONNECTION_STATUS':
-      return {
-        ...state,
-        connectionStatus: action.status,
-        error: action.error ?? null,
-      }
-
-    case 'SET_ENTITIES': {
-      const lights = action.entities.filter(
-        (e): e is LightEntity => e.entity_id.startsWith('light.')
-      )
-      const switches = action.entities.filter(
-        (e): e is SwitchEntity => e.entity_id.startsWith('switch.')
-      )
-      const sensors = action.entities.filter(
-        (e): e is SensorEntity => e.entity_id.startsWith('sensor.')
-      )
-      const binarySensors = action.entities.filter(
-        (e): e is BinarySensorEntity => e.entity_id.startsWith('binary_sensor.')
-      )
-      const weather = action.entities.filter(
-        (e): e is WeatherEntity => e.entity_id.startsWith('weather.')
-      )
-      const people = action.entities.filter(
-        (e): e is PersonEntity => e.entity_id.startsWith('person.')
-      )
-      const cameras = action.entities.filter(
-        (e): e is CameraEntity => e.entity_id.startsWith('camera.')
-      )
-      const calendars = action.entities.filter(
-        (e): e is CalendarEntity => e.entity_id.startsWith('calendar.')
-      )
-      const climate = action.entities.filter(
-        (e): e is ClimateEntity => e.entity_id.startsWith('climate.')
-      )
-      const vacuums = action.entities.filter(
-        (e): e is VacuumEntity => e.entity_id.startsWith('vacuum.')
-      )
-      const alarms = action.entities.filter(
-        (e): e is AlarmEntity => e.entity_id.startsWith('alarm_control_panel.')
-      )
-      const valves = action.entities.filter(
-        (e): e is ValveEntity => e.entity_id.startsWith('valve.')
-      )
-      const fans = action.entities.filter(
-        (e): e is FanEntity => e.entity_id.startsWith('fan.')
-      )
-      const locks = action.entities.filter(
-        (e): e is LockEntity => e.entity_id.startsWith('lock.')
-      )
-      const covers = action.entities.filter(
-        (e): e is CoverEntity => e.entity_id.startsWith('cover.')
-      )
-      const automations = action.entities.filter(
-        (e): e is AutomationEntity => e.entity_id.startsWith('automation.')
-      )
-      const scripts = action.entities.filter(
-        (e): e is ScriptEntity => e.entity_id.startsWith('script.')
-      )
-      return {
-        ...state,
-        entities: action.entities,
-        lights,
-        switches,
-        sensors,
-        binarySensors,
-        weather,
-        people,
-        cameras,
-        calendars,
-        climate,
-        vacuums,
-        alarms,
-        valves,
-        fans,
-        locks,
-        covers,
-        automations,
-        scripts,
-        lastUpdated: new Date(),
-      }
-    }
-
-    case 'SET_AREAS': {
-      const entityAreaMap = new Map<string, string>()
-      const entityDeviceMap = new Map<string, string>()
-      action.entityRegistry.forEach((entry) => {
-        if (entry.area_id) {
-          entityAreaMap.set(entry.entity_id, entry.area_id)
-        }
-        if (entry.device_id) {
-          entityDeviceMap.set(entry.entity_id, entry.device_id)
-        }
-      })
-      return {
-        ...state,
-        areas: action.areas,
-        devices: action.devices,
-        entityAreaMap,
-        entityDeviceMap,
-      }
-    }
-
-    case 'UPDATE_ENTITY': {
-      const entities = state.entities.map((e) =>
-        e.entity_id === action.entity.entity_id ? action.entity : e
-      )
-      const lights = entities.filter(
-        (e): e is LightEntity => e.entity_id.startsWith('light.')
-      )
-      const switches = entities.filter(
-        (e): e is SwitchEntity => e.entity_id.startsWith('switch.')
-      )
-      const sensors = entities.filter(
-        (e): e is SensorEntity => e.entity_id.startsWith('sensor.')
-      )
-      const binarySensors = entities.filter(
-        (e): e is BinarySensorEntity => e.entity_id.startsWith('binary_sensor.')
-      )
-      const weather = entities.filter(
-        (e): e is WeatherEntity => e.entity_id.startsWith('weather.')
-      )
-      const people = entities.filter(
-        (e): e is PersonEntity => e.entity_id.startsWith('person.')
-      )
-      const cameras = entities.filter(
-        (e): e is CameraEntity => e.entity_id.startsWith('camera.')
-      )
-      const calendars = entities.filter(
-        (e): e is CalendarEntity => e.entity_id.startsWith('calendar.')
-      )
-      const climate = entities.filter(
-        (e): e is ClimateEntity => e.entity_id.startsWith('climate.')
-      )
-      const vacuums = entities.filter(
-        (e): e is VacuumEntity => e.entity_id.startsWith('vacuum.')
-      )
-      const alarms = entities.filter(
-        (e): e is AlarmEntity => e.entity_id.startsWith('alarm_control_panel.')
-      )
-      const valves = entities.filter(
-        (e): e is ValveEntity => e.entity_id.startsWith('valve.')
-      )
-      const fans = entities.filter(
-        (e): e is FanEntity => e.entity_id.startsWith('fan.')
-      )
-      const locks = entities.filter(
-        (e): e is LockEntity => e.entity_id.startsWith('lock.')
-      )
-      const covers = entities.filter(
-        (e): e is CoverEntity => e.entity_id.startsWith('cover.')
-      )
-      const automations = entities.filter(
-        (e): e is AutomationEntity => e.entity_id.startsWith('automation.')
-      )
-      const scripts = entities.filter(
-        (e): e is ScriptEntity => e.entity_id.startsWith('script.')
-      )
-      return {
-        ...state,
-        entities,
-        lights,
-        switches,
-        sensors,
-        binarySensors,
-        weather,
-        people,
-        cameras,
-        calendars,
-        climate,
-        vacuums,
-        alarms,
-        valves,
-        fans,
-        locks,
-        covers,
-        automations,
-        scripts,
-        lastUpdated: new Date(),
-      }
-    }
-
-    case 'SET_HIDDEN_ENTITIES':
-      return { ...state, hiddenEntities: action.hidden }
-
-    case 'HIDE_ENTITY': {
-      const hidden = new Set(state.hiddenEntities)
-      hidden.add(action.entityId)
-      saveHiddenEntities(hidden)
-      return { ...state, hiddenEntities: hidden }
-    }
-
-    case 'SHOW_ENTITY': {
-      const hidden = new Set(state.hiddenEntities)
-      hidden.delete(action.entityId)
-      saveHiddenEntities(hidden)
-      return { ...state, hiddenEntities: hidden }
-    }
-
-    case 'HIDE_ROOM': {
-      const hidden = new Set(state.hiddenRooms)
-      hidden.add(action.roomId)
-      saveHiddenRooms(hidden)
-      return { ...state, hiddenRooms: hidden }
-    }
-
-    case 'SHOW_ROOM': {
-      const hidden = new Set(state.hiddenRooms)
-      hidden.delete(action.roomId)
-      saveHiddenRooms(hidden)
-      return { ...state, hiddenRooms: hidden }
-    }
-
-    case 'SET_HIDDEN_ROOMS':
-      return { ...state, hiddenRooms: action.hidden }
-
-    case 'SET_CUSTOM_NAME': {
-      const names = new Map(state.customNames)
-      names.set(action.id, action.name)
-      saveCustomNames(names)
-      return { ...state, customNames: names }
-    }
-
-    case 'SET_CUSTOM_NAMES':
-      return { ...state, customNames: action.names }
-
-    case 'REMOVE_CUSTOM_NAME': {
-      const names = new Map(state.customNames)
-      names.delete(action.id)
-      saveCustomNames(names)
-      return { ...state, customNames: names }
-    }
-
-    case 'SET_SETTINGS': {
-      // Merge with current settings (which should already include defaults)
-      const newSettings = { ...defaultSettings, ...state.settings, ...action.settings }
-      saveSettings(newSettings)
-      return { ...state, settings: newSettings }
-    }
-
-    case 'LOAD_SYNCED_DATA':
-      return {
-        ...state,
-        // Merge with defaults to ensure all fields exist
-        settings: { ...defaultSettings, ...action.settings },
-        hiddenEntities: action.hiddenEntities,
-        hiddenRooms: action.hiddenRooms,
-        customNames: action.customNames,
-        syncEnabled: action.syncEnabled,
-        settingsLoaded: true,
-      }
-
-    case 'SET_ERROR':
-      return { ...state, error: action.error }
-
-    case 'CLEAR_ERROR':
-      return { ...state, error: null }
-
-    default:
-      return state
-  }
 }
 
 // Related entity info for device grouping
@@ -564,35 +112,21 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
         // Load from Home Assistant
         const synced = await loadAllFromHA()
 
-        // Check if HA settings have actual content (not empty object)
-        const hasHASettings = synced.settings && Object.keys(synced.settings).length > 0
-        const hasHAHiddenEntities = synced.hiddenEntities && synced.hiddenEntities.size > 0
-        const hasHAHiddenRooms = synced.hiddenRooms && synced.hiddenRooms.size > 0
-        const hasHACustomNames = synced.customNames && synced.customNames.size > 0
-
-        // Merge HA settings with localStorage (HA takes precedence if it has content)
-        const localSettings = loadSettings()
-        const mergedSettings = hasHASettings
-          ? { ...localSettings, ...synced.settings }
-          : localSettings
-
         dispatch({
           type: 'LOAD_SYNCED_DATA',
-          settings: mergedSettings,
-          hiddenEntities: hasHAHiddenEntities ? synced.hiddenEntities! : loadHiddenEntities(),
-          hiddenRooms: hasHAHiddenRooms ? synced.hiddenRooms! : loadHiddenRooms(),
-          customNames: hasHACustomNames ? synced.customNames! : loadCustomNames(),
+          settings: synced.settings && Object.keys(synced.settings).length > 0
+            ? synced.settings
+            : defaultSettings,
+          hiddenEntities: synced.hiddenEntities ?? new Set(),
+          hiddenRooms: synced.hiddenRooms ?? new Set(),
+          customNames: synced.customNames ?? new Map(),
           syncEnabled: true,
         })
       } else {
-        // Fall back to localStorage
+        // Cannot load settings from Home Assistant — show error
         dispatch({
-          type: 'LOAD_SYNCED_DATA',
-          settings: loadSettings(),
-          hiddenEntities: loadHiddenEntities(),
-          hiddenRooms: loadHiddenRooms(),
-          customNames: loadCustomNames(),
-          syncEnabled: false,
+          type: 'SET_SETTINGS_ERROR',
+          error: 'Could not load settings from Home Assistant. Make sure the dashboard settings entities are accessible.',
         })
       }
     }
@@ -855,7 +389,7 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
     }
 
     return result
-  }, [state.lights, state.switches, state.sensors, state.binarySensors, state.climate, state.vacuums, state.alarms, state.valves, state.fans, state.locks, state.covers, state.areas, state.entityAreaMap, state.hiddenEntities, state.hiddenRooms, editMode, visibleLights, visibleSwitches, visibleSensors, visibleBinarySensors, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, visibleCovers])
+  }, [state.areas, state.entityAreaMap, state.hiddenEntities, state.hiddenRooms, editMode, state.lights, state.switches, state.sensors, state.binarySensors, state.climate, state.vacuums, state.alarms, state.valves, state.fans, state.locks, state.covers, visibleLights, visibleSwitches, visibleSensors, visibleBinarySensors, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, visibleCovers])
 
   // Connect and fetch initial state
   const connect = useCallback(async () => {
@@ -915,65 +449,37 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
 
   const hideEntity = useCallback((entityId: string) => {
     dispatch({ type: 'HIDE_ENTITY', entityId })
-    // Sync to HA in background
-    const newHidden = new Set(state.hiddenEntities)
-    newHidden.add(entityId)
-    if (state.syncEnabled) saveHiddenEntitiesToHA(newHidden)
-  }, [state.hiddenEntities, state.syncEnabled])
+  }, [])
 
   const showEntity = useCallback((entityId: string) => {
     dispatch({ type: 'SHOW_ENTITY', entityId })
-    // Sync to HA in background
-    const newHidden = new Set(state.hiddenEntities)
-    newHidden.delete(entityId)
-    if (state.syncEnabled) saveHiddenEntitiesToHA(newHidden)
-  }, [state.hiddenEntities, state.syncEnabled])
+  }, [])
 
   const showAllEntities = useCallback(() => {
     dispatch({ type: 'SET_HIDDEN_ENTITIES', hidden: new Set() })
-    saveHiddenEntities(new Set())
-    if (state.syncEnabled) saveHiddenEntitiesToHA(new Set())
-  }, [state.syncEnabled])
+  }, [])
 
   // Room visibility controls
   const hideRoom = useCallback((roomId: string) => {
     dispatch({ type: 'HIDE_ROOM', roomId })
-    // Sync to HA in background
-    const newHidden = new Set(state.hiddenRooms)
-    newHidden.add(roomId)
-    if (state.syncEnabled) saveHiddenRoomsToHA(newHidden)
-  }, [state.hiddenRooms, state.syncEnabled])
+  }, [])
 
   const showRoom = useCallback((roomId: string) => {
     dispatch({ type: 'SHOW_ROOM', roomId })
-    // Sync to HA in background
-    const newHidden = new Set(state.hiddenRooms)
-    newHidden.delete(roomId)
-    if (state.syncEnabled) saveHiddenRoomsToHA(newHidden)
-  }, [state.hiddenRooms, state.syncEnabled])
+  }, [])
 
   const showAllRooms = useCallback(() => {
     dispatch({ type: 'SET_HIDDEN_ROOMS', hidden: new Set() })
-    saveHiddenRooms(new Set())
-    if (state.syncEnabled) saveHiddenRoomsToHA(new Set())
-  }, [state.syncEnabled])
+  }, [])
 
   // Custom name controls
   const setCustomName = useCallback((id: string, name: string) => {
     dispatch({ type: 'SET_CUSTOM_NAME', id, name })
-    // Sync to HA in background
-    const newNames = new Map(state.customNames)
-    newNames.set(id, name)
-    if (state.syncEnabled) saveCustomNamesToHA(newNames)
-  }, [state.customNames, state.syncEnabled])
+  }, [])
 
   const removeCustomName = useCallback((id: string) => {
     dispatch({ type: 'REMOVE_CUSTOM_NAME', id })
-    // Sync to HA in background
-    const newNames = new Map(state.customNames)
-    newNames.delete(id)
-    if (state.syncEnabled) saveCustomNamesToHA(newNames)
-  }, [state.customNames, state.syncEnabled])
+  }, [])
 
   // Get display name - returns custom name if set, otherwise default
   const getDisplayName = useCallback((id: string, defaultName: string) => {
@@ -983,10 +489,7 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
   // Update settings
   const updateSettings = useCallback((settings: Partial<AppSettings>) => {
     dispatch({ type: 'SET_SETTINGS', settings })
-    // Sync to HA in background
-    const newSettings = { ...state.settings, ...settings }
-    if (state.syncEnabled) saveSettingsToHA(newSettings)
-  }, [state.settings, state.syncEnabled])
+  }, [])
 
   // Get entity type from entity_id
   const getEntityType = useCallback((entityId: string): RelatedEntity['entityType'] => {
@@ -1084,6 +587,30 @@ export function HomeAssistantProvider({ children }: { children: ReactNode }) {
     setServiceCallCallback(refresh)
     return () => setServiceCallCallback(null)
   }, [refresh])
+
+  // === Effect-based HA sync ===
+  // These effects watch state changes and automatically sync to HA.
+  // They only run AFTER settingsLoaded is true, preventing overwrites during initial load.
+
+  useEffect(() => {
+    if (!state.settingsLoaded || !state.syncEnabled) return
+    debouncedSaveSettingsToHA(state.settings)
+  }, [state.settings, state.settingsLoaded, state.syncEnabled])
+
+  useEffect(() => {
+    if (!state.settingsLoaded || !state.syncEnabled) return
+    debouncedSaveHiddenEntitiesToHA(state.hiddenEntities)
+  }, [state.hiddenEntities, state.settingsLoaded, state.syncEnabled])
+
+  useEffect(() => {
+    if (!state.settingsLoaded || !state.syncEnabled) return
+    debouncedSaveHiddenRoomsToHA(state.hiddenRooms)
+  }, [state.hiddenRooms, state.settingsLoaded, state.syncEnabled])
+
+  useEffect(() => {
+    if (!state.settingsLoaded || !state.syncEnabled) return
+    debouncedSaveCustomNamesToHA(state.customNames)
+  }, [state.customNames, state.settingsLoaded, state.syncEnabled])
 
   const value: HAContextValue = {
     ...state,

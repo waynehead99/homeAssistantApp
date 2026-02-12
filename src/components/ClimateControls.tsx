@@ -45,29 +45,27 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
   const [isPendingSubmit, setIsPendingSubmit] = useState(false)
   const pendingTempRef = useRef<number | null>(null)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const settleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Sync local state when entity prop changes (from context updates)
-  // But don't overwrite if we have a pending change that HA hasn't confirmed yet
+  // But don't overwrite if we have a pending change waiting to be confirmed
   useEffect(() => {
     const entityTemp = entity.attributes.temperature || 72
 
-    // If we have a pending temp and HA now matches it, clear the pending state
-    if (pendingTempRef.current !== null && entityTemp === pendingTempRef.current) {
-      pendingTempRef.current = null
-      setIsPendingSubmit(false)
-    }
-
     // Only sync from entity if we don't have a pending change
-    if (pendingTempRef.current === null && !isPendingSubmit) {
+    if (pendingTempRef.current === null) {
       setLocalTemp(entityTemp)
     }
-  }, [entity.attributes.temperature, isPendingSubmit])
+  }, [entity.attributes.temperature])
 
-  // Cleanup timer on unmount
+  // Cleanup timers on unmount
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current)
+      }
+      if (settleTimerRef.current) {
+        clearTimeout(settleTimerRef.current)
       }
     }
   }, [])
@@ -121,6 +119,19 @@ export function ClimateControls({ entity, onUpdate }: ClimateControlsProps) {
           entity_id: entity.entity_id,
           temperature: newTemp,
         })
+        setIsPendingSubmit(false)
+
+        // Give HA time to propagate the change to the device before
+        // accepting entity updates again (thermostats can be slow)
+        if (settleTimerRef.current) {
+          clearTimeout(settleTimerRef.current)
+        }
+        const sentTemp = newTemp
+        settleTimerRef.current = setTimeout(() => {
+          if (pendingTempRef.current === sentTemp) {
+            pendingTempRef.current = null
+          }
+        }, 8000)
       } catch (error) {
         console.error('Failed to set temperature:', error)
         pendingTempRef.current = null

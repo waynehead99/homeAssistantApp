@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import { calendarService } from '../services/homeAssistant'
 import type { CalendarEvent } from '../types/homeAssistant'
@@ -9,8 +9,8 @@ export function CalendarView() {
   const [loading, setLoading] = useState(true)
   const [daysToShow, setDaysToShow] = useState(7)
 
-  // Filter calendars based on settings pattern
-  const filteredCalendars = calendars.filter(c => {
+  // Filter calendars based on settings pattern (memoized for stable reference)
+  const filteredCalendars = useMemo(() => calendars.filter(c => {
     if (!settings.calendarPattern) return true
     try {
       const regex = new RegExp(settings.calendarPattern, 'i')
@@ -20,7 +20,13 @@ export function CalendarView() {
       return c.entity_id.toLowerCase().includes(pattern) ||
         (c.attributes.friendly_name || '').toLowerCase().includes(pattern)
     }
-  })
+  }), [calendars, settings.calendarPattern])
+
+  // Stable string key of filtered calendar IDs for useEffect dependency
+  const calendarIdsKey = useMemo(
+    () => filteredCalendars.map(c => c.entity_id).join(','),
+    [filteredCalendars]
+  )
 
   useEffect(() => {
     async function fetchEvents() {
@@ -35,7 +41,7 @@ export function CalendarView() {
       setLoading(false)
     }
     fetchEvents()
-  }, [filteredCalendars.length, daysToShow, settings.calendarPattern])
+  }, [calendarIdsKey, daysToShow])
 
   // Group events by date
   const eventsByDate = events.reduce((acc, event) => {

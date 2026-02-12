@@ -1,53 +1,7 @@
 import { useMemo } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
 import type { SensorEntity } from '../types/homeAssistant'
-
-// Helper to find sensor by partial entity_id match
-function findSensor(sensors: SensorEntity[], pattern: string | RegExp): SensorEntity | undefined {
-  if (typeof pattern === 'string') {
-    return sensors.find(s => s.entity_id.toLowerCase().includes(pattern.toLowerCase()))
-  }
-  return sensors.find(s => pattern.test(s.entity_id))
-}
-
-// Helper to find sensor by exact entity_id
-function findSensorById(sensors: SensorEntity[], entityId: string): SensorEntity | undefined {
-  return sensors.find(s => s.entity_id === entityId)
-}
-
-// Format time remaining (input is hours)
-function formatTimeRemaining(hours: number | undefined): string {
-  if (hours === undefined || isNaN(hours) || hours <= 0) return '—'
-
-  // If more than 24 hours, show days
-  if (hours >= 24) {
-    const days = Math.floor(hours / 24)
-    const remainingHours = Math.round(hours % 24)
-    if (remainingHours > 0) {
-      return `${days}d ${remainingHours}h`
-    }
-    return `${days} days`
-  }
-
-  // Less than 24 hours, show hours and minutes
-  const wholeHours = Math.floor(hours)
-  const mins = Math.round((hours - wholeHours) * 60)
-  if (mins > 0) {
-    return `${wholeHours}h ${mins}m`
-  }
-  return `${wholeHours}h`
-}
-
-// Format number with unit
-function formatValue(value: string | number | undefined, unit?: string, decimals = 1): string {
-  if (value === undefined || value === null || value === 'unknown' || value === 'unavailable') {
-    return '—'
-  }
-  const num = typeof value === 'string' ? parseFloat(value) : value
-  if (isNaN(num)) return '—'
-  const formatted = num.toFixed(decimals)
-  return unit ? `${formatted} ${unit}` : formatted
-}
+import { safeParseFloat, formatValue, formatTimeRemaining, findSensor, findSensorById } from '../utils/camperUtils'
 
 // Battery SOC gauge component
 function BatteryGauge({ soc, voltage, current, power, systemState, timeToEmpty }: {
@@ -425,7 +379,7 @@ export function CamperView() {
 
   // Check if shore power is connected (Grid L1 > 0)
   const gridConnected = useMemo(() => {
-    const l1Power = parseFloat(gridL1?.state || '0')
+    const l1Power = safeParseFloat(gridL1?.state) ?? 0
     return l1Power > 0
   }, [gridL1])
 
@@ -476,27 +430,27 @@ export function CamperView() {
     <div className="p-4 pb-24 space-y-4">
       {/* Battery Status - Main Focus */}
       <BatteryGauge
-        soc={batterySOC ? parseFloat(batterySOC.state) : undefined}
-        voltage={batteryVoltage ? parseFloat(batteryVoltage.state) : undefined}
-        current={batteryCurrent ? parseFloat(batteryCurrent.state) : undefined}
-        power={batteryPower ? parseFloat(batteryPower.state) : undefined}
+        soc={batterySOC ? safeParseFloat(batterySOC.state) : undefined}
+        voltage={batteryVoltage ? safeParseFloat(batteryVoltage.state) : undefined}
+        current={batteryCurrent ? safeParseFloat(batteryCurrent.state) : undefined}
+        power={batteryPower ? safeParseFloat(batteryPower.state) : undefined}
         systemState={systemState?.state}
-        timeToEmpty={timeToEmpty ? parseFloat(timeToEmpty.state) : undefined}
+        timeToEmpty={timeToEmpty ? safeParseFloat(timeToEmpty.state) : undefined}
       />
 
       {/* Solar & Grid Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SolarCard
-          power={solarPower ? parseFloat(solarPower.state) : undefined}
-          voltage={solarVoltage ? parseFloat(solarVoltage.state) : undefined}
-          current={solarCurrent ? parseFloat(solarCurrent.state) : undefined}
-          yieldToday={solarYield ? parseFloat(solarYield.state) : undefined}
+          power={solarPower ? safeParseFloat(solarPower.state) : undefined}
+          voltage={solarVoltage ? safeParseFloat(solarVoltage.state) : undefined}
+          current={solarCurrent ? safeParseFloat(solarCurrent.state) : undefined}
+          yieldToday={solarYield ? safeParseFloat(solarYield.state) : undefined}
         />
 
         <GridCard
           connected={gridConnected}
-          l1Power={gridL1 ? parseFloat(gridL1.state) : undefined}
-          l2Power={gridL2 ? parseFloat(gridL2.state) : undefined}
+          l1Power={gridL1 ? safeParseFloat(gridL1.state) : undefined}
+          l2Power={gridL2 ? safeParseFloat(gridL2.state) : undefined}
         />
       </div>
 
@@ -504,14 +458,14 @@ export function CamperView() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* AC Loads */}
         <ACLoadsCard
-          power={acLoads ? parseFloat(acLoads.state) : undefined}
+          power={acLoads ? safeParseFloat(acLoads.state) : undefined}
         />
 
         {/* DC Loads */}
         {(loadPower || loadCurrent) && (
           <LoadsCard
-            power={loadPower ? parseFloat(loadPower.state) : undefined}
-            current={loadCurrent ? parseFloat(loadCurrent.state) : undefined}
+            power={loadPower ? safeParseFloat(loadPower.state) : undefined}
+            current={loadCurrent ? safeParseFloat(loadCurrent.state) : undefined}
           />
         )}
       </div>

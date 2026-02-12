@@ -113,7 +113,7 @@ export async function initializeSync(): Promise<boolean> {
     if (!settingsExists) {
       const created = await setEntityData(SETTINGS_ENTITY_ID, '{}', 'Dashboard Settings')
       if (!created) {
-        console.warn('Could not create settings entity, using localStorage')
+        console.warn('Could not create settings entity')
         syncStatus = { available: false, lastSync: null, error: 'Could not create settings entity' }
         return false
       }
@@ -279,4 +279,33 @@ export async function loadAllFromHA(): Promise<SyncedData> {
   ])
 
   return { settings, hiddenEntities, hiddenRooms, customNames }
+}
+
+// Debounced save helpers - batch rapid changes into a single HA write
+const debounceTimers: Record<string, ReturnType<typeof setTimeout>> = {}
+
+function debouncedSave(key: string, fn: () => Promise<boolean>, delayMs = 300): void {
+  if (debounceTimers[key]) {
+    clearTimeout(debounceTimers[key])
+  }
+  debounceTimers[key] = setTimeout(() => {
+    fn().catch(err => console.warn(`Debounced save failed for ${key}:`, err))
+    delete debounceTimers[key]
+  }, delayMs)
+}
+
+export function debouncedSaveSettingsToHA(settings: AppSettings): void {
+  debouncedSave('settings', () => saveSettingsToHA(settings))
+}
+
+export function debouncedSaveHiddenEntitiesToHA(hidden: Set<string>): void {
+  debouncedSave('hiddenEntities', () => saveHiddenEntitiesToHA(hidden))
+}
+
+export function debouncedSaveHiddenRoomsToHA(hidden: Set<string>): void {
+  debouncedSave('hiddenRooms', () => saveHiddenRoomsToHA(hidden))
+}
+
+export function debouncedSaveCustomNamesToHA(names: Map<string, string>): void {
+  debouncedSave('customNames', () => saveCustomNamesToHA(names))
 }

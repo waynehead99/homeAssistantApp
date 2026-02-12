@@ -205,9 +205,10 @@ export async function callService(
     body: JSON.stringify(data),
   })
 
-  // Trigger refresh after a short delay to allow HA to update state
+  // Trigger refresh after a delay to allow HA to update state
+  // Needs to be long enough for slow devices (thermostats, Z-Wave) to confirm
   if (onServiceCallComplete) {
-    setTimeout(onServiceCallComplete, 500)
+    setTimeout(onServiceCallComplete, 2000)
   }
 
   return result
@@ -399,9 +400,57 @@ export const cameraService = {
     return getFrigateApiUrl(`/events/${eventId}/thumbnail.jpg`)
   },
 
+  // Get Frigate event snapshot URL (full resolution)
+  getFrigateSnapshotUrl: (eventId: string): string => {
+    return getFrigateApiUrl(`/events/${eventId}/snapshot.jpg`)
+  },
+
   // Get Frigate clip URL
   getFrigateClipUrl: (eventId: string): string => {
     return getFrigateApiUrl(`/events/${eventId}/clip.mp4`)
+  },
+}
+
+// Weather service for forecasts
+export const weatherService = {
+  // Get forecast via weather.get_forecasts service (HA 2023.12+)
+  // return_response must be a query parameter, response is wrapped in service_response
+  getForecast: async (entityId: string, type: 'daily' | 'hourly' = 'daily'): Promise<import('../types/homeAssistant').WeatherForecast[]> => {
+    if (!HA_URL || !HA_TOKEN) return []
+
+    try {
+      const url = getApiUrl('/api/services/weather/get_forecasts?return_response')
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          entity_id: entityId,
+          type,
+        }),
+      })
+
+      if (!response.ok) return []
+
+      const data = JSON.parse(await response.text())
+
+      // Response: { "service_response": { "weather.entity": { "forecast": [...] } } }
+      const serviceResponse = data?.service_response ?? data
+      if (serviceResponse?.[entityId]?.forecast) {
+        return serviceResponse[entityId].forecast
+      }
+
+      // Try any key with a forecast array
+      for (const key of Object.keys(serviceResponse || {})) {
+        if (Array.isArray(serviceResponse[key]?.forecast)) {
+          return serviceResponse[key].forecast
+        }
+      }
+
+      return []
+    } catch (err) {
+      console.warn(`Could not fetch ${type} forecast:`, err)
+      return []
+    }
   },
 }
 

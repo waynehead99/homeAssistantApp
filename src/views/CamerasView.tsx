@@ -87,6 +87,7 @@ function CameraSnapshot({
 export function CamerasView() {
   const { cameras: allCameras } = useHomeAssistantContext()
   const [selectedCamera, setSelectedCamera] = useState<string | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<FrigateEvent | null>(null)
   const [frigateEvents, setFrigateEvents] = useState<FrigateEvent[]>([])
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
@@ -131,6 +132,13 @@ export function CamerasView() {
     return () => clearInterval(interval)
   }, [])
 
+  // Reset selection if camera no longer exists
+  useEffect(() => {
+    if (selectedCamera && !cameras.find(c => c.entity_id === selectedCamera)) {
+      setSelectedCamera(null)
+    }
+  }, [selectedCamera, cameras])
+
   const formatEventTime = (timestamp: number) => {
     const date = new Date(timestamp * 1000)
     const now = new Date()
@@ -144,6 +152,119 @@ export function CamerasView() {
     return date.toLocaleDateString()
   }
 
+  const formatFullTime = (timestamp: number) => {
+    const date = new Date(timestamp * 1000)
+    return date.toLocaleString(undefined, {
+      month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    })
+  }
+
+  const formatDuration = (startTime: number, endTime: number | null) => {
+    if (!endTime) return 'Ongoing'
+    const seconds = Math.round(endTime - startTime)
+    if (seconds < 60) return `${seconds}s`
+    const minutes = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${minutes}m ${secs}s`
+  }
+
+  // Event detail modal
+  if (selectedEvent) {
+    const event = selectedEvent
+    const eventCameraName = event.camera.replace(/_/g, ' ')
+    const score = event.top_score ?? event.score ?? event.data?.top_score ?? event.data?.score ?? 0
+    const description = event.description ?? event.data?.description ?? null
+    const snapshotUrl = event.has_snapshot ? cameraService.getFrigateSnapshotUrl(event.id) : null
+    const thumbnailUrl = cameraService.getFrigateThumbnailUrl(event.id)
+    const clipUrl = event.has_clip ? cameraService.getFrigateClipUrl(event.id) : null
+
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center" onClick={() => setSelectedEvent(null)}>
+        <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          {/* Event snapshot/thumbnail */}
+          <div className="relative bg-slate-900 aspect-video">
+            <img
+              src={snapshotUrl || thumbnailUrl}
+              alt={`${event.label} detection`}
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Fall back to thumbnail if snapshot fails
+                if (snapshotUrl && e.currentTarget.src !== thumbnailUrl) {
+                  e.currentTarget.src = thumbnailUrl
+                }
+              }}
+            />
+            <button
+              onClick={() => setSelectedEvent(null)}
+              className="absolute top-3 right-3 p-1.5 bg-black/50 backdrop-blur-sm text-white rounded-full hover:bg-black/70 transition-colors"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Event details */}
+          <div className="p-4 space-y-3">
+            {/* Title */}
+            <div>
+              <h3 className="text-lg font-semibold text-slate-800 capitalize">
+                {event.label}{event.sub_label ? ` (${event.sub_label})` : ''} detected
+              </h3>
+              <p className="text-sm text-slate-500 capitalize">{eventCameraName}</p>
+            </div>
+
+            {/* Description */}
+            {description && (
+              <div className="glass-panel p-3 rounded-xl">
+                <p className="text-sm text-slate-700">{description}</p>
+              </div>
+            )}
+
+            {/* Details grid */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="glass-panel p-3 rounded-xl">
+                <p className="text-xs text-slate-500">Time</p>
+                <p className="text-sm font-medium text-slate-800">{formatFullTime(event.start_time)}</p>
+              </div>
+              <div className="glass-panel p-3 rounded-xl">
+                <p className="text-xs text-slate-500">Duration</p>
+                <p className="text-sm font-medium text-slate-800">{formatDuration(event.start_time, event.end_time)}</p>
+              </div>
+              {score > 0 && (
+                <div className="glass-panel p-3 rounded-xl">
+                  <p className="text-xs text-slate-500">Confidence</p>
+                  <p className="text-sm font-medium text-slate-800">{Math.round(score * 100)}%</p>
+                </div>
+              )}
+              {event.zones && event.zones.length > 0 && (
+                <div className="glass-panel p-3 rounded-xl">
+                  <p className="text-xs text-slate-500">Zones</p>
+                  <p className="text-sm font-medium text-slate-800 capitalize">{event.zones.join(', ').replace(/_/g, ' ')}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Clip button */}
+            {clipUrl && (
+              <a
+                href={clipUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-500 transition-colors font-medium text-sm"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+                </svg>
+                View Clip
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (cameras.length === 0) {
     return (
@@ -164,7 +285,6 @@ export function CamerasView() {
   if (selectedCamera) {
     const camera = cameras.find(c => c.entity_id === selectedCamera)
     if (!camera) {
-      setSelectedCamera(null)
       return null
     }
     const name = camera.attributes.friendly_name || selectedCamera.split('.')[1].replace(/_/g, ' ')
@@ -257,9 +377,10 @@ export function CamerasView() {
               const thumbnailUrl = cameraService.getFrigateThumbnailUrl(event.id)
 
               return (
-                <div
+                <button
                   key={event.id}
-                  className="glass-card p-3 flex items-center gap-3"
+                  onClick={() => setSelectedEvent(event)}
+                  className="glass-card p-3 flex items-center gap-3 w-full text-left hover:ring-2 hover:ring-blue-500/50 transition-all"
                 >
                   {/* Thumbnail */}
                   <div className="w-16 h-12 glass-panel rounded-lg overflow-hidden flex-shrink-0">
@@ -285,15 +406,18 @@ export function CamerasView() {
                     </p>
                   </div>
 
-                  {/* Confidence */}
-                  {score > 0 && (
-                    <div className="text-right">
+                  {/* Confidence + chevron */}
+                  <div className="flex items-center gap-1.5">
+                    {score > 0 && (
                       <span className="text-xs text-slate-500">
                         {Math.round(score * 100)}%
                       </span>
-                    </div>
-                  )}
-                </div>
+                    )}
+                    <svg className="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </div>
+                </button>
               )
             })}
           </div>

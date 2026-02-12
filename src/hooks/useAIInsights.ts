@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import {
   generateHomeInsights,
   isClaudeConfigured,
@@ -25,6 +25,7 @@ const CACHE_DURATION = 5 * 60 * 1000
 let cachedInsight: string | null = null
 let lastGeneratedTime = 0
 let lastPeopleStatus: string = '' // Track people status to invalidate cache on change
+let lastVisibilityHash: string = '' // Track entity/room visibility changes
 
 // Module-level cache for home context (for chat)
 let cachedHomeContext: string | null = null
@@ -34,6 +35,7 @@ export function useAIInsights() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [homeContext, setHomeContext] = useState<string | null>(cachedHomeContext)
+  const generatingRef = useRef(false) // Concurrency guard
 
   const {
     sensors,
@@ -117,18 +119,26 @@ export function useAIInsights() {
       return
     }
 
-    // Check cache unless forced refresh or people status changed
+    // Concurrency guard - prevent multiple simultaneous calls
+    if (generatingRef.current) return
+    generatingRef.current = true
+
+    // Check cache unless forced refresh, people status changed, or visibility changed
     const now = Date.now()
     const currentPeopleStatus = filteredPeople.map(p => `${p.entity_id}:${p.state}`).sort().join(',')
+    const currentVisibilityHash = `${hiddenEntities.size}:${hiddenRooms.size}`
     const peopleChanged = currentPeopleStatus !== lastPeopleStatus
+    const visibilityChanged = currentVisibilityHash !== lastVisibilityHash
 
-    if (!force && !peopleChanged && cachedInsight && (now - lastGeneratedTime) < CACHE_DURATION) {
+    if (!force && !peopleChanged && !visibilityChanged && cachedInsight && (now - lastGeneratedTime) < CACHE_DURATION) {
       setInsight(cachedInsight)
+      generatingRef.current = false
       return
     }
 
-    // Update people status tracker
+    // Update trackers
     lastPeopleStatus = currentPeopleStatus
+    lastVisibilityHash = currentVisibilityHash
 
     setLoading(true)
     setError(null)
@@ -426,8 +436,9 @@ export function useAIInsights() {
       setInsight('Unable to generate insights at this time.')
     } finally {
       setLoading(false)
+      generatingRef.current = false
     }
-  }, [visibleBinarySensors, visibleLights, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, weather, calendars, filteredPeople, settings, sensors, binarySensors, areas, entityAreaMap])
+  }, [visibleBinarySensors, visibleLights, visibleClimate, visibleVacuums, visibleAlarms, visibleValves, visibleFans, visibleLocks, weather, calendars, filteredPeople, settings, sensors, binarySensors, areas, entityAreaMap, hiddenEntities, hiddenRooms])
 
   const refresh = useCallback(() => {
     generateInsight(true)

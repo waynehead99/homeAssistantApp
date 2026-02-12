@@ -1,5 +1,5 @@
 // Hook for voice interaction using OpenAI (Whisper STT + TTS)
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import {
   isOpenAIConfigured,
   transcribeAudio,
@@ -36,9 +36,11 @@ export function useVoiceInteraction() {
   const isTTSSupported = true
 
   // Initialize browser speech synthesis for fallback
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window && !synthRef.current) {
-    synthRef.current = window.speechSynthesis
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window && !synthRef.current) {
+      synthRef.current = window.speechSynthesis
+    }
+  }, [])
 
   // Start listening with OpenAI Whisper
   const startListening = useCallback(async () => {

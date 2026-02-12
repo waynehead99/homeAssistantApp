@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useHomeAssistantContext } from '../context/HomeAssistantContext'
+import { getAreaClimate } from '../utils/roomUtils'
 import { LightCard } from '../components/LightCard'
 import { SwitchCard } from '../components/SwitchCard'
 import { lightService, callService } from '../services/homeAssistant'
@@ -159,19 +160,8 @@ export function RoomsView() {
 
   const handleHide = editMode ? hideEntity : undefined
 
-  // Get temperature and humidity for an area
-  const getAreaClimate = (sensors: typeof entitiesByArea[0]['sensors']) => {
-    const tempSensor = sensors.find(s => s.attributes.device_class === 'temperature')
-    const humiditySensor = sensors.find(s => s.attributes.device_class === 'humidity')
-
-    return {
-      temp: tempSensor ? `${Math.round(parseFloat(tempSensor.state))}°` : null,
-      humidity: humiditySensor ? `${Math.round(parseFloat(humiditySensor.state))}%` : null,
-    }
-  }
-
   // Room controls
-  const turnAllLightsOn = async (areaLights: typeof entitiesByArea[0]['lights']) => {
+  const turnAllLightsOn = (areaLights: typeof entitiesByArea[0]['lights']) => {
     for (const light of areaLights) {
       if (light.state === 'off') {
         updateEntity({ ...light, state: 'on' })
@@ -180,7 +170,7 @@ export function RoomsView() {
     }
   }
 
-  const turnAllLightsOff = async (areaLights: typeof entitiesByArea[0]['lights']) => {
+  const turnAllLightsOff = (areaLights: typeof entitiesByArea[0]['lights']) => {
     for (const light of areaLights) {
       if (light.state === 'on') {
         updateEntity({ ...light, state: 'off' })

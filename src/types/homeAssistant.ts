@@ -91,6 +91,9 @@ export interface WeatherForecast {
   precipitation?: number
   precipitation_probability?: number
   wind_speed?: number
+  wind_bearing?: number
+  humidity?: number
+  is_daytime?: boolean
 }
 
 // Weather-specific attributes
@@ -167,6 +170,7 @@ export interface FrigateEvent {
   data?: {
     score?: number
     top_score?: number
+    description?: string
   }
   start_time: number
   end_time: number | null
@@ -174,6 +178,7 @@ export interface FrigateEvent {
   has_clip: boolean
   has_snapshot: boolean
   zones?: string[]
+  description?: string | null
 }
 
 // Calendar event (from HA calendar API)
